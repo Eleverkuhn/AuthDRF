@@ -4,4 +4,13 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
-dependencies = []
+dependencies = [
+  "psycopg[binary]==3.2.12",
+  "python-dotenv==1.2.1",
+  "Django==5.2.8",
+  "requests==2.32.5",
+  "djangorestframework==3.16.1",
+  "httpie==3.2.4",
+  "Faker==38.2.0",
+  "pydantic-settings==2.12.0",
+]
