@@ -29,6 +29,7 @@ services:
       - POSTGRES_HOST=${POSTGRES_CONTAINER_HOST}
       - POSTGRES_PORT=${POSTGRES_PORT}
       - DJANGO_KEY=${DJANGO_KEY}
+      - PYTHONPATH=${PYTHONPATH}
     depends_on:
       postgres:
         condition: service_healthy
@@ -48,6 +49,8 @@ services:
       - POSTGRES_HOST=${POSTGRES_CONTAINER_HOST}
       - POSTGRES_PORT=${POSTGRES_PORT}
       - DJANGO_KEY=${DJANGO_KEY}
+      - DJANGO_CONTAINER_HOST=${DJANGO_CONTAINER_HOST}
+      - PYTHONPATH=${PYTHONPATH}
     depends_on:
       migration:
         condition: service_completed_successfully
@@ -68,7 +71,10 @@ services:
       - POSTGRES_HOST=${POSTGRES_CONTAINER_HOST}
       - POSTGRES_PORT=${POSTGRES_PORT}
       - DJANGO_KEY=${DJANGO_KEY}
-    command: python manage.py test
+      - PYTHONPATH=${PYTHONPATH}
+    command: >
+      dockerize -wait tcp://django:8000 -timeout 10s
+      python manage.py test tests.test_integration.test_setup
     depends_on:
       migration:
         condition: service_completed_successfully
