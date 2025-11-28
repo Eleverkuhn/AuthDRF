@@ -1,0 +1,9 @@
+{% extends "base.xhtml" %}
+
+{% block header_text %}Sign up{% endblock %}
+
+{% block content %}
+<form id="sign-up-form" method="POST">
+  {% csrf_token %}
+</form>
+{% endblock %}
