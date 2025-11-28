@@ -3,7 +3,6 @@ from pathlib import Path
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 env_path = str(Path(__file__).parent.parent.parent / ".env")
-print(env_path)
 
 
 class Env(BaseSettings):
@@ -16,5 +15,9 @@ class Env(BaseSettings):
     django_host: str
     django_port: str
     django_key: str
+    django_container_host: str
 
     model_config = SettingsConfigDict(env_file=env_path)
+
+
+env = Env()
