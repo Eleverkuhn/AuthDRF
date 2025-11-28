@@ -4,10 +4,16 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.renderers import TemplateHTMLRenderer
 
+from authdrf.service.auth_services import SignUpService
+
 
 class SignUpView(APIView):
     renderer_classes = [TemplateHTMLRenderer]
     template_name = "sign_up.xhtml"
 
     def get(self, request: Request) -> Response:
+        return Response(status=status.HTTP_200_OK)
+
+    def post(self, request: Request) -> Response:
+        SignUpService(request.data).exec()
         return Response(status=status.HTTP_200_OK)

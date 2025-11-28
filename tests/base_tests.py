@@ -1,6 +1,12 @@
 from faker import Faker
 
 
+class BaseUserTest:  # TODO: rename to 'BaseAuthTest'
+    def setUp(self) -> None:
+        super().setUp()
+        self.request_data = UserTestData().generate()
+
+
 class UserTestData:
     def __init__(self) -> None:
         self.faker = Faker()
@@ -22,7 +28,7 @@ class UserTestData:
         return test_data
 
 
-class BaseAuthTest:
+class BaseAuthTest:  # TODO: Move setUp to 'SignUpWorkflow' and remove this class
     def setUp(self) -> None:
         super().setUp()
         self.test_pasword = "C0mplic@tedTeStpass"
