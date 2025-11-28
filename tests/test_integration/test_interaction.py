@@ -30,6 +30,12 @@ class TestSignUpWorkflow(BaseInteractionTest):
     def setUp(self) -> None:
         super().setUp()
         self.url = "".join([self.base_url, "auth/sign-up/"])
+        self.field_to_placeholder = {
+            "first-name": "John",
+            "middle-name": "Michael",
+            "last-name": "Doe",
+            "email": "email@example.com"
+        }
 
     def tearDown(self) -> None:
         self.browser.quit()
@@ -41,3 +47,17 @@ class TestSignUpWorkflow(BaseInteractionTest):
 
         # User sees 'sign-up' form
         self.browser.find_element(By.ID, "sign-up-form")
+
+        # 'Sign up' form contains 'first name', 'middle name', 'last name '
+        # 'email', 'password' and 'confirm_password' fields, their
+        # placeholders and 'Sign Up' button
+        self._check_fields_with_placeholders()
+        self.browser.find_element(By.ID, "password")
+        self.browser.find_element(By.ID, "confirm-password")
+        self.browser.find_element(By.ID, "sign-up-button")
+
+    def _check_fields_with_placeholders(self) -> None:
+        for field_id, expected_placeholder in self.field_to_placeholder.items():
+            field = self.browser.find_element(By.ID, field_id)
+            placeholder_text = field.get_attribute("placeholder")
+            self.assertEqual(placeholder_text, expected_placeholder)

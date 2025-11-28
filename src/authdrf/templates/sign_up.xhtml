@@ -4,6 +4,13 @@
 
 {% block content %}
 <form id="sign-up-form" method="POST">
+  <input id="first-name" placeholder="John">First Name</input>
+  <input id="middle-name" placeholder="Michael">Middle Name</input>
+  <input id="last-name" placeholder="Doe">Last Name</input>
+  <input id="email" placeholder="email@example.com">Email</input>
+  <input id="password">Password</input>
+  <input id="confirm-password">Password</input>
+  <button id="sign-up-button" type="submit">Sign Up</button>
   {% csrf_token %}
 </form>
 {% endblock %}
