@@ -8,5 +8,6 @@ wheels/
 
 # Virtual environments
 .env
+.env.local
 .venv
 .python-version

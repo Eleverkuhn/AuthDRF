@@ -27,7 +27,7 @@ SECRET_KEY = env.django_key
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [env.django_container_host, "localhost"]
+ALLOWED_HOSTS = [env.django_host, "localhost"]
 
 
 # Application definition
@@ -83,12 +83,8 @@ DATABASES = {
         'PASSWORD': env.postgres_password,
         'HOST': env.postgres_host,
         'PORT': env.postgres_port,
-        'TEST': {
-            'NAME': None,
         },
     }
-}
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators

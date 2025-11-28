@@ -37,7 +37,7 @@ class TestProjectSetup(TestCase, BaseDatabaseTest):
                 self.execute_test_query(cursor)
 
     def test_connection_to_django_container(self) -> None:
-        url = f"http://{env.django_container_host}:8000/"
+        url = f"http://{env.django_host}:8000/"
         try:
             response = requests.get(url, timeout=5)
             self.assertEqual(response.status_code, 200)
