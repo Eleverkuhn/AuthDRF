@@ -13,4 +13,14 @@ dependencies = [
   "httpie==3.2.4",
   "Faker==38.2.0",
   "pydantic-settings==2.12.0",
+  "selenium==4.38.0",
 ]
+
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.uv]
+name = "authdrf"
+version = "0.1.0"
+packages = ["src"]
