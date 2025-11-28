@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
     'authdrf',
 ]
 
@@ -132,3 +133,11 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # logging
 logging_config = LoggingConfig().load()
 logging.config.dictConfig(logging_config)
+
+# Auth model
+AUTH_USER_MODEL = "authdrf.User"
+
+# Migrations
+MIGRATION_MODULES = {
+    "authdrf": "authdrf.data.migrations"
+}
