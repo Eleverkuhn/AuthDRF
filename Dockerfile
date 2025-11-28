@@ -9,7 +9,8 @@ RUN curl -L https://github.com/jwilder/dockerize/releases/download/${DOCKERIZE_V
 RUN dockerize --version
 
 WORKDIR /app
-COPY . .
+COPY pyproject.toml ./
 RUN pip install --upgrade pip
 RUN pip install .
+COPY . .
 EXPOSE 8000
