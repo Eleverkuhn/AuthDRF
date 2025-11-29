@@ -1,5 +1,3 @@
-from django.test import TestCase
-from django.urls import reverse
 from rest_framework import status
 from faker import Faker
 
@@ -35,23 +33,6 @@ class UserTestData:
             lower_case=True
         )
         return test_password
-
-
-class BaseAuthTest:  # TODO: Move setUp to 'SignUpWorkflow' and remove this class
-    def setUp(self) -> None:
-        super().setUp()
-        self.test_pasword = "C0mplic@tedTeStpass"
-        self.field_to_placeholder = {
-            "first-name": "John",
-            "middle-name": "Michael",
-            "last-name": "Doe",
-            "email": "email@example.com"
-        }
-        self.sign_up_data = {
-            **self.field_to_placeholder,
-            "password": self.test_pasword,
-            "confirm-password": self.test_pasword,
-        }
 
 
 class BaseViewTestMixin:
