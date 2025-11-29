@@ -29,7 +29,7 @@ SECRET_KEY = env.django_key
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [env.django_host, "localhost"]
+ALLOWED_HOSTS = [env.django_host, "localhost", "127.0.0.1"]
 
 
 # Application definition
