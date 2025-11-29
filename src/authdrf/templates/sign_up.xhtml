@@ -3,14 +3,14 @@
 {% block header_text %}Sign up{% endblock %}
 
 {% block content %}
-<form id="sign-up-form" method="POST">
-  <input id="first-name" placeholder="John">First Name</input>
-  <input id="middle-name" placeholder="Michael">Middle Name</input>
-  <input id="last-name" placeholder="Doe">Last Name</input>
-  <input id="email" placeholder="email@example.com">Email</input>
-  <input id="password">Password</input>
-  <input id="confirm-password">Password</input>
-  <button id="sign-up-button" type="submit">Sign Up</button>
+<form id="sign-up-form" method="POST" action={% url "sign_up" %}>
   {% csrf_token %}
+  <input id="first-name" placeholder="John" name="first_name">First Name</input>
+  <input id="middle-name" placeholder="Michael" name="middle_name">Middle Name</input>
+  <input id="last-name" placeholder="Doe" name="last_name">Last Name</input>
+  <input id="email" placeholder="email@example.com" name="email">Email</input>
+  <input id="password" name="password">Password</input>
+  <input id="confirm-password" name="confirm_password">Password</input>
+  <button id="sign-up-button" type="submit">Sign Up</button>
 </form>
 {% endblock %}
