@@ -1,3 +1,6 @@
+from django.test import TestCase
+from django.urls import reverse
+from rest_framework import status
 from faker import Faker
 
 
@@ -49,3 +52,16 @@ class BaseAuthTest:  # TODO: Move setUp to 'SignUpWorkflow' and remove this clas
             "password": self.test_pasword,
             "confirm-password": self.test_pasword,
         }
+
+
+class BaseViewTestMixin:
+    url: str
+    template: str
+
+    def test_get_returns_200_OK(self) -> None:
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_correct_template_is_used(self) -> None:
+        response = self.client.get(self.url)
+        self.assertTemplateUsed(response, self.template)
