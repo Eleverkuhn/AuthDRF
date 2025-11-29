@@ -10,4 +10,7 @@ wheels/
 .env
 .env.local
 .venv
+
+# Tools
+.coverage
 .python-version
