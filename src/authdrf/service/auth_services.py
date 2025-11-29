@@ -15,3 +15,7 @@ class SignUpService:
         serializer = UserSerializer(data=self.request_data)
         if serializer.is_valid(raise_exception=True):
             return serializer.validated_data
+
+    @staticmethod
+    def success_message() -> str:
+        return "Your account has been successfully created"

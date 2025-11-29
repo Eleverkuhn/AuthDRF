@@ -23,5 +23,5 @@ class SignUpView(APIView):
 
     def post(self, request: Request) -> RedirectResponse:
         SignUpService(request.data).exec()
-        messages.success(request, "Your account has been successfully created")
+        messages.success(request, SignUpService.success_message())
         return redirect("main")
