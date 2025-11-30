@@ -5,12 +5,22 @@
 {% block content %}
 <form id="sign-up-form" method="POST" action={% url "sign_up" %}>
   {% csrf_token %}
-  <input id="first-name" placeholder="John" name="first_name">First Name</input>
-  <input id="middle-name" placeholder="Michael" name="middle_name">Middle Name</input>
-  <input id="last-name" placeholder="Doe" name="last_name">Last Name</input>
-  <input id="email" placeholder="email@example.com" name="email">Email</input>
-  <input id="password" name="password">Password</input>
-  <input id="confirm-password" name="confirm_password">Password</input>
+  {% for field in serializer %}
+    <label for="{{ field.name }}">{{ field.label }}</label>
+    <input
+        id="{{ field.name }}"
+        name="{{ field.name }}"
+        value="{{ field.value|default:'' }}"
+        placeholder="{{ field.help_text }}"
+    >
+    {% if field.errors %}
+      <ul class="errors">
+        {% for error in field.errors %}
+          <li>{{ error }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  {% endfor %}
   <button id="sign-up-button" type="submit">Sign Up</button>
 </form>
 {% endblock %}

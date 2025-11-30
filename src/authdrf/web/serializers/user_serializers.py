@@ -27,18 +27,21 @@ class PasswordMatchesValidator:
 class PasswordSerializer(serializers.Serializer):
     password = serializers.CharField(
         write_only=True,
-        validators=[BuiltInPasswordValidator()]
+        validators=[BuiltInPasswordValidator()],
+        help_text=""
     )
     confirm_password = serializers.CharField(
         write_only=True,
         required=True,
-        validators=[PasswordMatchesValidator("password")]
+        validators=[PasswordMatchesValidator("password")],
+        help_text=""
     )
 
 
 class UserSerializer(serializers.ModelSerializer, PasswordSerializer):
     email = serializers.EmailField(
-        validators=[UniqueValidator(User.objects.all())]
+        validators=[UniqueValidator(User.objects.all())],
+        help_text="example@email.com"
     )
 
     class Meta:

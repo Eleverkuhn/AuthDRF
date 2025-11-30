@@ -7,6 +7,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.firefox.options import Options
 
 from config.settings.dev import env
+from authdrf.web.serializers.user_serializers import UserSerializer
 from tests.base_tests import UserTestData
 
 
@@ -32,12 +33,6 @@ class TestSignUpWorkflow(BaseInteractionTest):
     def setUp(self) -> None:
         super().setUp()
         self.url = "".join([self.base_url, reverse("sign_up")])
-        self.field_to_placeholder = {
-            "first-name": "John",
-            "middle-name": "Michael",
-            "last-name": "Doe",
-            "email": "email@example.com"
-        }
         self.sign_up_data = UserTestData().generate()
 
     def tearDown(self) -> None:
@@ -54,24 +49,25 @@ class TestSignUpWorkflow(BaseInteractionTest):
         # 'Sign up' form contains 'first name', 'middle name', 'last name '
         # 'email', 'password' and 'confirm_password' fields, their
         # placeholders and 'Sign Up' button
-        self._check_fields_with_placeholders()
-        self.browser.find_element(By.ID, "password")
-        self.browser.find_element(By.ID, "confirm-password")
-        self.browser.find_element(By.ID, "sign-up-button")
+        serializer = UserSerializer()
+        for serializer_field in serializer:
+            field = self.browser.find_element(By.ID, serializer_field.name)
+            self.assertEqual(
+                field.get_attribute("placeholder"),
+                serializer_field.help_text
+            )
+
+        # self._check_fields_with_placeholders()
+        # self.browser.find_element(By.ID, "password")
+        # self.browser.find_element(By.ID, "confirm-password")
+        # self.browser.find_element(By.ID, "sign-up-button")
 
         # User fill in the fields and submit the form
         self._fill_in_sign_up_form()
         self.browser.find_element(By.ID, "sign-up-button").click()
 
-        # User get redirected to a page telling him that sign up was
-        # successfully completed and requests him to visit 'Login page'
+        # User get redirected to the main page
         self.assertEqual(self.browser.current_url, self.base_url)
-
-    def _check_fields_with_placeholders(self) -> None:
-        for field_id, expected_placeholder in self.field_to_placeholder.items():
-            field = self.browser.find_element(By.ID, field_id)
-            placeholder_text = field.get_attribute("placeholder")
-            self.assertEqual(placeholder_text, expected_placeholder)
 
     def _fill_in_sign_up_form(self) -> None:
         for field_name, submit_value in self.sign_up_data.items():
