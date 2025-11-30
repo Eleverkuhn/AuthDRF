@@ -2,7 +2,7 @@ from django.test import TestCase
 from django.urls import reverse
 from rest_framework import status
 
-from authdrf.web.views.auth_views import SignUpView
+from authdrf.web.views.auth_views import SignUpView, SignInView
 from authdrf.service.auth_services import SignUpService
 from authdrf.data.models.user_models import User
 from tests.base_tests import BaseUserTest, BaseViewTestMixin
@@ -31,3 +31,8 @@ class TestSignUpView(BaseUserTest, BaseViewTestMixin, TestCase):
             SignUpService.success_message(),
             response.content.decode()
         )
+
+
+class TestSignInView(BaseViewTestMixin, TestCase):
+    url = reverse("sign_in")
+    template = SignInView.template_name
