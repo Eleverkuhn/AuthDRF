@@ -24,12 +24,26 @@ class PasswordMatchesValidator:
             raise ValidationError("Password do not match")
 
 
-class PasswordSerializer(serializers.Serializer):
+class BasePasswordSerializer(serializers.Serializer):
     password = serializers.CharField(
         write_only=True,
         validators=[BuiltInPasswordValidator()],
         help_text=""
     )
+
+
+class BaseEmailSerializer(serializers.Serializer):
+    email = serializers.EmailField(
+        validators=[UniqueValidator(User.objects.all())],
+        help_text="example@email.com"
+    )
+
+
+class SignInSerializer(BasePasswordSerializer, BaseEmailSerializer):
+    pass
+
+
+class PasswordSerializer(BasePasswordSerializer):
     confirm_password = serializers.CharField(
         write_only=True,
         required=True,
@@ -38,12 +52,11 @@ class PasswordSerializer(serializers.Serializer):
     )
 
 
-class UserSerializer(serializers.ModelSerializer, PasswordSerializer):
-    email = serializers.EmailField(
-        validators=[UniqueValidator(User.objects.all())],
-        help_text="example@email.com"
-    )
-
+class UserSerializer(
+    serializers.ModelSerializer,
+    SignInSerializer,
+    PasswordSerializer
+):
     class Meta:
         model = User
         fields = [
