@@ -10,14 +10,20 @@ from rest_framework.response import Response
 from rest_framework.renderers import TemplateHTMLRenderer
 from rest_framework.validators import ValidationError
 
-from authdrf.web.serializers.user_serializers import UserSerializer
+from authdrf.web.serializers.user_serializers import (
+    UserSerializer, SignInSerializer
+)
 from authdrf.service.auth_services import SignUpService
 
 type RedirectResponse = HttpResponseRedirect | HttpResponsePermanentRedirect
 
 
-class SignUpView(APIView):
+class BaseView(APIView):
     renderer_classes = [TemplateHTMLRenderer]
+    template_name = "base.xhtml"
+
+
+class SignUpView(BaseView):
     template_name = "sign_up.xhtml"
 
     def get(self, request: Request) -> Response:
@@ -40,3 +46,14 @@ class SignUpView(APIView):
             service.exec()
             messages.success(request, service.success_message())
             return redirect("main")
+
+
+class SignInView(BaseView):
+    template_name = "sign_in.xhtml"
+
+    def get(self, request: Request) -> Response:
+        response = Response(
+            {"serializer": SignInSerializer(), "errors": {}},
+            status=status.HTTP_200_OK
+        )
+        return response

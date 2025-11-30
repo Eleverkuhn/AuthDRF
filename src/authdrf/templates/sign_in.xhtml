@@ -1,0 +1,12 @@
+{% extends "base.xhtml" %}
+
+{% block header_text %}Sign in{% endblock %}
+
+{% block content %}
+
+{% url 'sign_in' as sign_in_url %}
+{% with form_id="sign-in-form" action=sign_in_url button_id="sign-in-button" button_text="Sign In" serializer=serializer %}
+  {% include "form.xhtml" %}
+{% endwith %}
+
+{% endblock %}
