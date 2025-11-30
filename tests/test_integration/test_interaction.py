@@ -6,6 +6,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.firefox.options import Options
 
+from logger.setup import LoggingConfig
 from config.settings.dev import env
 from authdrf.web.serializers.user_serializers import (
     UserSerializer, SignInSerializer
@@ -27,7 +28,7 @@ class BaseInteractionTest(StaticLiveServerTestCase):
             command_executor=f"http://{env.selenium_host}:{env.selenium_port}/wd/hub",
             options=options
         )
-        self.base_url = f"http://{env.live_server}:{env.django_port}/"
+        self.base_url = f"http://{env.live_server}:{env.django_port}"
 
     def tearDown(self) -> None:
         try:
@@ -47,8 +48,8 @@ class BaseInteractionTest(StaticLiveServerTestCase):
                 serializer_field.help_text
             )
 
-    def fill_in_form(self) -> None:
-        for field_name, submit_value in self.request_data.items():
+    def fill_in_form(self, data: dict) -> None:
+        for field_name, submit_value in data.items():
             input_box = self.browser.find_element(By.NAME, field_name)
             input_box.send_keys(submit_value)
 
@@ -75,11 +76,12 @@ class TestSignUpWorkflow(BaseInteractionTest):
         self.browser.find_element(By.ID, "sign-up-button")
 
         # User fill in the fields and submit the form
-        self.fill_in_form()
+        self.fill_in_form(self.request_data)
         self.browser.find_element(By.ID, "sign-up-button").click()
 
         # User get redirected to the main page
-        self.assertEqual(self.browser.current_url, self.base_url)
+        main_page = "".join([self.base_url, reverse("main")])
+        self.assertEqual(self.browser.current_url, main_page)
 
 
 class TestSignInWorkflow(BaseInteractionTest):
@@ -88,7 +90,17 @@ class TestSignInWorkflow(BaseInteractionTest):
         super().setUp()
         self.url = "".join([self.base_url, reverse("sign_in")])
         self.serializer = SignInSerializer()
-        self.request_data = UserTestData().generate_sign_in_data()
+        self.sign_up_data = UserTestData().generate_sign_up_data()
+        self._create_user()
+        self.request_data = {
+            "email": self.sign_up_data["email"],
+            "password": self.sign_up_data["password"]
+        }
+
+    def _create_user(self) -> None:
+        self.browser.get("".join([self.base_url, reverse("sign_up")]))
+        self.fill_in_form(self.sign_up_data)
+        self.browser.find_element(By.ID, "sign-up-button").click()
 
     def test(self) -> None:
         # User opens 'sign-in' page
@@ -103,11 +115,9 @@ class TestSignInWorkflow(BaseInteractionTest):
         self.browser.find_element(By.ID, "sign-in-button")
 
         # User fill in the fields and submit the form
-        self.fill_in_form()
+        self.fill_in_form(self.request_data)
         self.browser.find_element(By.ID, "sign-in-button").click()
 
-        # Ensure access and refresh tokens are set
-        self.browser.get_cookie("access_token")
-        self.browser.get_cookie("refresh_token")
-
-
+        # User get redirected to his personal page
+        user_page = "".join([self.base_url, reverse("user_page")])
+        self.assertEqual(self.browser.current_url, user_page)

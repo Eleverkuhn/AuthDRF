@@ -58,3 +58,9 @@ class TestSignInView(BaseViewTestMixin, TestCase):
         self.request_data["password"] = "invalid password"
         response = self.client.post(self.url, data=self.request_data)
         self.assertIn(InvalidPassword.default_message, response.content.decode())
+
+    def test_redirect_to_user_page_on_succeed(self) -> None:
+        response = self.client.post(
+            self.url, data=self.request_data, follow=False
+        )
+        self.assertEqual(response["Location"], reverse("user_page"))

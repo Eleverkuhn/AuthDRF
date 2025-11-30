@@ -12,23 +12,13 @@ from rest_framework.validators import ValidationError
 from rest_framework.serializers import Serializer
 
 from authdrf.exc import AuthenticationError
+from authdrf.web.views.base_views import BaseViewMixin
 from authdrf.web.serializers.user_serializers import (
     UserSerializer, SignInSerializer
 )
 from authdrf.service.auth_services import SignUpService, SignInService
 
 type RedirectResponse = HttpResponseRedirect | HttpResponsePermanentRedirect
-
-
-class BaseViewMixin:
-    renderer_classes = [TemplateHTMLRenderer]
-    template_name: str
-    serializer_class: type[Serializer]
-
-    def get(self, request: Request) -> Response:
-        return Response(
-            {"serializer": self.serializer_class}, status=status.HTTP_200_OK
-        )
 
 
 class SignUpView(BaseViewMixin, APIView):
@@ -68,7 +58,8 @@ class SignInView(BaseViewMixin, APIView):
     def _sign_in_user(
             self, serializer: SignInSerializer
     ) -> RedirectResponse | Response:
-        service = SignInService(redirect("main"), serializer.validated_data)
+        redirect_response = redirect("user_page")
+        service = SignInService(redirect_response, serializer.validated_data)
         try:
             response = service.exec()
         except AuthenticationError as error:
