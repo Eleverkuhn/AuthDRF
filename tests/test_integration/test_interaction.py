@@ -47,13 +47,18 @@ class BaseInteractionTest(StaticLiveServerTestCase):
                 serializer_field.help_text
             )
 
+    def fill_in_form(self) -> None:
+        for field_name, submit_value in self.request_data.items():
+            input_box = self.browser.find_element(By.NAME, field_name)
+            input_box.send_keys(submit_value)
+
 
 class TestSignUpWorkflow(BaseInteractionTest):
     @override
     def setUp(self) -> None:
         super().setUp()
         self.url = "".join([self.base_url, reverse("sign_up")])
-        self.sign_up_data = UserTestData().generate()
+        self.request_data = UserTestData().generate_sign_up_data()
         self.serializer = UserSerializer()
 
     def test(self) -> None:
@@ -68,30 +73,13 @@ class TestSignUpWorkflow(BaseInteractionTest):
         # placeholders and 'Sign Up' button
         self.form_rendering()
         self.browser.find_element(By.ID, "sign-up-button")
-        # serializer = UserSerializer()
-        # for serializer_field in serializer:
-        #     field = self.browser.find_element(By.ID, serializer_field.name)
-        #     self.assertEqual(
-        #         field.get_attribute("placeholder"),
-        #         serializer_field.help_text
-        #     )
-
-        # self._check_fields_with_placeholders()
-        # self.browser.find_element(By.ID, "password")
-        # self.browser.find_element(By.ID, "confirm-password")
-        # self.browser.find_element(By.ID, "sign-up-button")
 
         # User fill in the fields and submit the form
-        self._fill_in_sign_up_form()
+        self.fill_in_form()
         self.browser.find_element(By.ID, "sign-up-button").click()
 
         # User get redirected to the main page
         self.assertEqual(self.browser.current_url, self.base_url)
-
-    def _fill_in_sign_up_form(self) -> None:
-        for field_name, submit_value in self.sign_up_data.items():
-            input_box = self.browser.find_element(By.NAME, field_name)
-            input_box.send_keys(submit_value)
 
 
 class TestSignInWorkflow(BaseInteractionTest):
@@ -100,6 +88,7 @@ class TestSignInWorkflow(BaseInteractionTest):
         super().setUp()
         self.url = "".join([self.base_url, reverse("sign_in")])
         self.serializer = SignInSerializer()
+        self.request_data = UserTestData().generate_sign_in_data()
 
     def test(self) -> None:
         # User opens 'sign-in' page
@@ -112,3 +101,13 @@ class TestSignInWorkflow(BaseInteractionTest):
         # button. 'Email' field have a placeholder
         self.form_rendering()
         self.browser.find_element(By.ID, "sign-in-button")
+
+        # User fill in the fields and submit the form
+        self.fill_in_form()
+        self.browser.find_element(By.ID, "sign-in-button").click()
+
+        # Ensure access and refresh tokens are set
+        self.browser.get_cookie("access_token")
+        self.browser.get_cookie("refresh_token")
+
+

@@ -32,15 +32,8 @@ class BasePasswordSerializer(serializers.Serializer):
     )
 
 
-class BaseEmailSerializer(serializers.Serializer):
-    email = serializers.EmailField(
-        validators=[UniqueValidator(User.objects.all())],
-        help_text="example@email.com"
-    )
-
-
-class SignInSerializer(BasePasswordSerializer, BaseEmailSerializer):
-    pass
+class SignInSerializer(BasePasswordSerializer):
+    email = serializers.EmailField(help_text="example@email.com")
 
 
 class PasswordSerializer(BasePasswordSerializer):
@@ -52,11 +45,12 @@ class PasswordSerializer(BasePasswordSerializer):
     )
 
 
-class UserSerializer(
-    serializers.ModelSerializer,
-    SignInSerializer,
-    PasswordSerializer
-):
+class UserSerializer(serializers.ModelSerializer, PasswordSerializer):
+    email = serializers.EmailField(
+        validators=[UniqueValidator(User.objects.all())],
+        help_text="example@email.com"
+    )
+
     class Meta:
         model = User
         fields = [

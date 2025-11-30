@@ -18,6 +18,16 @@ class BaseJWTEncodingService:
         return int(time.time())
 
 
+class JWTService:
+    def create(self, id: int, exp_time: int) -> str:
+        payload = {"id": id}
+        jwt = JWTEncodingService(payload, exp_time).exec()
+        return jwt
+
+    def verify(self) -> None:
+        pass
+
+
 class JWTDecodingService(BaseJWTEncodingService):
     def __init__(self, token: str) -> None:
         self.token = token

@@ -10,10 +10,11 @@ from rest_framework.response import Response
 from rest_framework.renderers import TemplateHTMLRenderer
 from rest_framework.validators import ValidationError
 
+from logger.setup import LoggingConfig
 from authdrf.web.serializers.user_serializers import (
     UserSerializer, SignInSerializer
 )
-from authdrf.service.auth_services import SignUpService
+from authdrf.service.auth_services import SignUpService, SignInService
 
 type RedirectResponse = HttpResponseRedirect | HttpResponsePermanentRedirect
 
@@ -49,6 +50,7 @@ class SignUpView(BaseView):
 
 
 class SignInView(BaseView):
+    # TODO: Add handling of 'EmailNotFound' exception
     template_name = "sign_in.xhtml"
 
     def get(self, request: Request) -> Response:
@@ -57,3 +59,17 @@ class SignInView(BaseView):
             status=status.HTTP_200_OK
         )
         return response
+
+    def post(self, request: Request) -> RedirectResponse:
+        serializer = SignInSerializer(data=request.data)
+        try:
+            serializer.is_valid(raise_exception=True)
+        except ValidationError:
+            return Response(
+                {"serializer": serializer, "errors": serializer.errors}
+            )
+        else:
+            response = redirect("main")
+            service = SignInService(response, serializer.validated_data)
+            response = service.exec()
+            return response

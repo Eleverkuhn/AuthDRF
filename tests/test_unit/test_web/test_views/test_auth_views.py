@@ -2,10 +2,11 @@ from django.test import TestCase
 from django.urls import reverse
 from rest_framework import status
 
+from logger.setup import LoggingConfig
 from authdrf.web.views.auth_views import SignUpView, SignInView
 from authdrf.service.auth_services import SignUpService
 from authdrf.data.models.user_models import User
-from tests.base_tests import BaseUserTest, BaseViewTestMixin
+from tests.base_tests import BaseUserTest, BaseViewTestMixin, UserTestData
 
 
 class TestSignUpView(BaseUserTest, BaseViewTestMixin, TestCase):
@@ -36,3 +37,13 @@ class TestSignUpView(BaseUserTest, BaseViewTestMixin, TestCase):
 class TestSignInView(BaseViewTestMixin, TestCase):
     url = reverse("sign_in")
     template = SignInView.template_name
+
+    def setUp(self) -> None:
+        self.request_data = UserTestData().generate_sign_in_data()
+
+    def test_cookies_are_set(self) -> None:
+        response = self.client.post(
+            self.url, data=self.request_data, follow=False
+        )
+        self.assertIn("access_token", response.cookies)
+        self.assertIn("refresh_token", response.cookies)

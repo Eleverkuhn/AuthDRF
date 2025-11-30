@@ -31,7 +31,7 @@ class User(models.Model):
 
 class UserRepository:  # TODO: move this to separate module
     def __init__(self, model_data: dict[str, str | bytes]) -> None:
-        self.model_data = model_data
+        self.model_data = model_data.copy()
 
     def create(self) -> User:
         self.hash_password()
