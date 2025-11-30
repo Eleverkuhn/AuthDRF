@@ -1,7 +1,7 @@
 from rest_framework import status
 from faker import Faker
 
-from authdrf.data.models.user_models import UserRepository
+from authdrf.data.models.user_models import User, UserRepository
 
 
 class BaseUserTest:  # TODO: rename to 'BaseAuthTest'
@@ -19,6 +19,9 @@ class BaseSignInTest:
 class UserTestData:
     def __init__(self) -> None:
         self.faker = Faker()
+
+    def create_user(self) -> User:
+        return UserRepository(self._generate_user_model_data()).create()
 
     def generate_sign_in_data(self) -> dict[str, str]:
         user_model_data = self._generate_user_model_data()

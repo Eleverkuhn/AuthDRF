@@ -24,8 +24,8 @@ class JWTService:
         jwt = JWTEncodingService(payload, exp_time).exec()
         return jwt
 
-    def verify(self) -> None:
-        pass
+    def verify(self, token: str) -> Payload:
+        return JWTDecodingService(token).exec()
 
 
 class JWTDecodingService(BaseJWTEncodingService):

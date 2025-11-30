@@ -3,9 +3,8 @@ from typing import override
 
 from rest_framework.response import Response
 
-from logger.setup import LoggingConfig
-from authdrf.exc import EmailNotFound
-from authdrf.service.jwt_services import JWTService
+from authdrf.exc import EmailNotFound, AuthorizationError, JWTError
+from authdrf.service.jwt_services import JWTService, Payload
 from authdrf.service.password_services import PasswordService
 from authdrf.data.models.user_models import User, UserRepository
 
@@ -98,3 +97,55 @@ class TokenService:
 
     def create_refresh_token(self) -> str:
         return JWTService().create(self.user_id, self.refresh_token_life())
+
+
+class AuthorizationService:
+    def __init__(self, cookies: dict) -> None:
+        self.cookies = cookies
+
+    @property
+    def access_token(self) -> str | None:
+        return self.cookies.get("access_token")
+
+    @property
+    def refresh_token(self) -> str | None:
+        return self.cookies.get("refresh_token")
+
+    def exec(self) -> User:
+        self.check_cookies_content()
+        payload = self.check_jwt_is_valid()
+        self.check_payload_contains_user_id(payload)
+        user = self.check_user_exists(payload["id"])
+        return user
+
+    def check_cookies_content(self) -> None:
+        self.check_access_token_exists()
+        self.check_refresh_token_exists()
+
+    def check_access_token_exists(self) -> None:
+        if not self.access_token:
+            raise AuthorizationError()
+
+    def check_refresh_token_exists(self) -> None:
+        if not self.refresh_token:
+            raise AuthorizationError()
+
+    def check_jwt_is_valid(self) -> Payload:
+        try:
+            payload = JWTService().verify(self.access_token)
+        except JWTError:
+            raise AuthorizationError()
+        else:
+            return payload
+
+    def check_payload_contains_user_id(self, payload: Payload) -> None:
+        if not payload.get("id"):
+            raise AuthorizationError()
+
+    def check_user_exists(self, user_id: int) -> User:
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            raise AuthorizationError()
+        else:
+            return user

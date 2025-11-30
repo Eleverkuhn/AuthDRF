@@ -6,7 +6,6 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.firefox.options import Options
 
-from logger.setup import LoggingConfig
 from config.settings.dev import env
 from authdrf.web.serializers.user_serializers import (
     UserSerializer, SignInSerializer

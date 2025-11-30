@@ -13,6 +13,10 @@ class AuthenticationError(CustomValueError):
     pass
 
 
+class AuthorizationError(CustomValueError):
+    default_message = "Unauthorized"
+
+
 class JWTError(CustomValueError):
     pass
 

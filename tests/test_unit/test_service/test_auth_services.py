@@ -1,10 +1,14 @@
+from time import sleep
 from typing import override
 
 from django.test import TestCase
 from rest_framework.response import Response
 
-from authdrf.exc import EmailNotFound
-from authdrf.service.auth_services import SignUpService, SignInService
+from authdrf.exc import EmailNotFound, AuthorizationError
+from authdrf.service.auth_services import (
+    SignUpService, SignInService, AuthorizationService
+)
+from authdrf.service.jwt_services import JWTService
 from authdrf.data.models.user_models import User
 from tests.base_tests import BaseUserTest, BaseSignInTest, UserTestData
 
@@ -34,3 +38,49 @@ class TestSignInService(BaseSignInTest, TestCase):
     def test_check_user_returns_user_if_email_was_found(self) -> None:
         user = self.service.check_user_exists()
         self.assertEqual(user.email, self.request_data["email"])
+
+
+class TestAuthoriztionService(TestCase):
+    def test_exec_returns_user_if_checks_are_passed(self) -> None:
+        test_user = UserTestData().create_user()
+        token = JWTService().create(test_user.id, 600)
+        cookies = {"access_token": token, "refresh_token": token}
+        user = AuthorizationService(cookies).exec()
+        self.assertEqual(test_user.id, user.id)
+
+    def test_raises_authorization_error_if_no_access_token(self) -> None:
+        with self.assertRaises(AuthorizationError):
+            AuthorizationService({}).check_access_token_exists()
+
+    def test_check_access_token_exists_passes_if_access_token(self) -> None:
+        cookies = {"access_token": "mock"}
+        AuthorizationService(cookies).check_access_token_exists
+
+    def test_raises_authorization_error_if_no_refresh_token(self) -> None:
+        with self.assertRaises(AuthorizationError):
+            AuthorizationService({}).check_access_token_exists()
+
+    def test_check_refresh_exists_passes_if_refresh_token(self) -> None:
+        cookies = {"refresh_token": "mock"}
+        AuthorizationService(cookies).check_access_token_exists
+
+    def test_raises_authorization_error_if_token_invalid(self) -> None:
+        cookies = {"access_token": "invalid_token"}
+        with self.assertRaises(AuthorizationError):
+            AuthorizationService(cookies).check_jwt_is_valid()
+
+    def test_raises_authorization_error_if_token_expired(self) -> None:
+        token = JWTService().create(1, 1)
+        cookies = {"access_token": token}
+        sleep(2)
+        with self.assertRaises(AuthorizationError):
+            AuthorizationService(cookies).check_jwt_is_valid()
+
+    def test_raises_authorization_error_if_payload_invalid(self) -> None:
+        payload = {"not_id": 1}
+        with self.assertRaises(AuthorizationError):
+            AuthorizationService({}).check_payload_contains_user_id(payload)
+
+    def test_check_user_exists_raises_authorization_error_if_no_user(self) -> None:
+        with self.assertRaises(AuthorizationError):
+            AuthorizationService({}).check_user_exists(1)
