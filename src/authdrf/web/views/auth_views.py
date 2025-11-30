@@ -9,8 +9,9 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.renderers import TemplateHTMLRenderer
 from rest_framework.validators import ValidationError
+from rest_framework.serializers import Serializer
 
-from logger.setup import LoggingConfig
+from authdrf.exc import AuthenticationError
 from authdrf.web.serializers.user_serializers import (
     UserSerializer, SignInSerializer
 )
@@ -19,22 +20,23 @@ from authdrf.service.auth_services import SignUpService, SignInService
 type RedirectResponse = HttpResponseRedirect | HttpResponsePermanentRedirect
 
 
-class BaseView(APIView):
+class BaseViewMixin:
     renderer_classes = [TemplateHTMLRenderer]
-    template_name = "base.xhtml"
-
-
-class SignUpView(BaseView):
-    template_name = "sign_up.xhtml"
+    template_name: str
+    serializer_class: type[Serializer]
 
     def get(self, request: Request) -> Response:
         return Response(
-            {"serializer": UserSerializer(), "errors": {}},
-            status=status.HTTP_200_OK
+            {"serializer": self.serializer_class}, status=status.HTTP_200_OK
         )
 
-    def post(self, request: Request) -> RedirectResponse:
-        serializer = UserSerializer(data=request.data)
+
+class SignUpView(BaseViewMixin, APIView):
+    template_name = "sign_up.xhtml"
+    serializer_class = UserSerializer
+
+    def post(self, request: Request) -> RedirectResponse | Response:
+        serializer = self.serializer_class(data=request.data)
         try:
             serializer.is_valid(raise_exception=True)
         except ValidationError:
@@ -49,27 +51,30 @@ class SignUpView(BaseView):
             return redirect("main")
 
 
-class SignInView(BaseView):
-    # TODO: Add handling of 'EmailNotFound' exception
+class SignInView(BaseViewMixin, APIView):
     template_name = "sign_in.xhtml"
+    serializer_class = SignInSerializer
 
-    def get(self, request: Request) -> Response:
-        response = Response(
-            {"serializer": SignInSerializer(), "errors": {}},
-            status=status.HTTP_200_OK
-        )
-        return response
-
-    def post(self, request: Request) -> RedirectResponse:
-        serializer = SignInSerializer(data=request.data)
+    def post(self, request: Request) -> RedirectResponse | Response:
+        serializer = self.serializer_class(data=request.data)
         try:
             serializer.is_valid(raise_exception=True)
         except ValidationError:
+            return Response({"serializer": serializer})
+        else:
+            response = self._sign_in_user(serializer)
+            return response
+
+    def _sign_in_user(
+            self, serializer: SignInSerializer
+    ) -> RedirectResponse | Response:
+        service = SignInService(redirect("main"), serializer.validated_data)
+        try:
+            response = service.exec()
+        except AuthenticationError as error:
             return Response(
-                {"serializer": serializer, "errors": serializer.errors}
+                {"serializer": serializer, "error": str(error)},
+                status=status.HTTP_400_BAD_REQUEST
             )
         else:
-            response = redirect("main")
-            service = SignInService(response, serializer.validated_data)
-            response = service.exec()
             return response

@@ -51,7 +51,7 @@ class UserTestData:
     def _generate_sign_in_data_with_no_user(self) -> dict[str, str]:
         sign_in_data = {
             "email": self.faker.email(),
-            "pasword": self._generate_password()
+            "password": self._generate_password()
         }
         return sign_in_data
 

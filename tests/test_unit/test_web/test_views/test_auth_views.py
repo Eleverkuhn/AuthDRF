@@ -3,6 +3,7 @@ from django.urls import reverse
 from rest_framework import status
 
 from logger.setup import LoggingConfig
+from authdrf.exc import EmailNotFound, InvalidPassword
 from authdrf.web.views.auth_views import SignUpView, SignInView
 from authdrf.service.auth_services import SignUpService
 from authdrf.data.models.user_models import User
@@ -47,3 +48,13 @@ class TestSignInView(BaseViewTestMixin, TestCase):
         )
         self.assertIn("access_token", response.cookies)
         self.assertIn("refresh_token", response.cookies)
+
+    def test_response_contains_email_not_found_error_message(self) -> None:
+        request_data = UserTestData()._generate_sign_in_data_with_no_user()
+        response = self.client.post(self.url, data=request_data)
+        self.assertIn(EmailNotFound.default_message, response.content.decode())
+
+    def test_response_contains_invalid_password_error_message(self) -> None:
+        self.request_data["password"] = "invalid password"
+        response = self.client.post(self.url, data=self.request_data)
+        self.assertIn(InvalidPassword.default_message, response.content.decode())

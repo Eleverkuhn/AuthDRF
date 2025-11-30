@@ -32,8 +32,9 @@ class BasePasswordSerializer(serializers.Serializer):
     )
 
 
-class SignInSerializer(BasePasswordSerializer):
+class SignInSerializer(serializers.Serializer):
     email = serializers.EmailField(help_text="example@email.com")
+    password = serializers.CharField(write_only=True, help_text="")
 
 
 class PasswordSerializer(BasePasswordSerializer):
