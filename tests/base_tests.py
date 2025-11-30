@@ -1,6 +1,7 @@
 from rest_framework import status
 from faker import Faker
 
+from authdrf.service.auth_services import TokenService
 from authdrf.data.models.user_models import User, UserRepository
 
 
@@ -97,3 +98,14 @@ class BaseViewTestMixin:
     def test_correct_template_is_used(self) -> None:
         response = self.client.get(self.url)
         self.assertTemplateUsed(response, self.template)
+
+
+class BaseTestProtectedViewMixin:
+    def setUp(self) -> None:
+        self.user = UserTestData().create_user()
+        self.set_cookies()
+
+    def set_cookies(self) -> None:
+        access_token, refresh_token = TokenService(self.user.id).exec()
+        self.client.cookies["access_token"] = access_token
+        self.client.cookies["refresh_token"] = refresh_token

@@ -14,7 +14,7 @@ class AuthenticationError(CustomValueError):
 
 
 class AuthorizationError(CustomValueError):
-    default_message = "Unauthorized"
+    default_message = "You need to sign in to view content of this page"
 
 
 class JWTError(CustomValueError):
