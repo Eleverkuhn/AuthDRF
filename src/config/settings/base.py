@@ -134,9 +134,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 logging_config = LoggingConfig().load()
 logging.config.dictConfig(logging_config)
 
-# Auth model
-AUTH_USER_MODEL = "authdrf.User"
-
 # Migrations
 MIGRATION_MODULES = {
     "authdrf": "authdrf.data.migrations"
