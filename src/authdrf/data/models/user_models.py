@@ -44,6 +44,12 @@ class UserRepository:  # TODO: move this to separate module
         else:
             return user
 
+    def change_password(self, user_id: int) -> None:
+        self.hash_password()
+        user = User.objects.get(id=user_id)
+        user.password = self.model_data["password"]
+        user.save()
+
     def hash_password(self) -> None:
         hashed_password = PasswordService(self.model_data["password"]).hash()
         self.model_data["password"] = hashed_password

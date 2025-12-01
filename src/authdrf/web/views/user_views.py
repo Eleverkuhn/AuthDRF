@@ -20,7 +20,13 @@ from authdrf.service.user_services import UserService
 from authdrf.data.models.user_models import User
 
 
-class UserPageView(ProtectedViewMixin, BaseViewMixin, APIView):
+class PUTView(APIView):
+    def post(self, request: Request) -> Response | RedirectResponse:
+        if request.POST.get("_method") == "PUT":
+            return self.put(request)
+
+
+class UserPageView(ProtectedViewMixin, BaseViewMixin, PUTView):
     template_name = "my.xhtml"
     serializer_class = PersonalUserSerializer
 
@@ -28,10 +34,6 @@ class UserPageView(ProtectedViewMixin, BaseViewMixin, APIView):
     def get(self, request: Request) -> Response:
         response = self._construct_response(request.user)
         return response
-
-    def post(self, request: Request) -> Response | RedirectResponse:
-        if request.POST.get("_method") == "PUT":
-            return self.put(request)
 
     def put(self, request: Request) -> Response | RedirectResponse:
         serializer = self.serializer_class(data=request.data)
@@ -47,11 +49,14 @@ class UserPageView(ProtectedViewMixin, BaseViewMixin, APIView):
             self, request: Request, serializer: PersonalUserSerializer
     ) -> Response | RedirectResponse:
         try:
-            user = UserService(serializer.validated_data).update(request.user.id)
+            service = UserService(serializer.validated_data)
+            user = service.update(request.user.id)
         except UserAlreadyExists as error:
-            return Response(
-                {"serializer": self.serializer_class(request.user), "error": str(error)}
-            )
+            content = {
+                "serializer": self.serializer_class(request.user),
+                "error": str(error)
+            }
+            return Response(content)
         else:
             response = self._construct_response(user)
             return response
@@ -60,3 +65,19 @@ class UserPageView(ProtectedViewMixin, BaseViewMixin, APIView):
         content = {"serializer": self.serializer_class(user)}
         response = Response(content, status=status.HTTP_200_OK)
         return response
+
+
+class ChangePasswordView(ProtectedViewMixin, BaseViewMixin, PUTView):
+    template_name = "change_password.xhtml"
+    serializer_class = PasswordSerializer
+
+    def put(self, request: Request) -> Response | RedirectResponse:
+        serializer = self.serializer_class(data=request.data)
+        try:
+            serializer.is_valid(raise_exception=True)
+        except ValidationError:
+            return Response({"serializer": serializer})
+        else:
+            service = UserService(serializer.validated_data)
+            service.change_password(request.user.id)
+            return Response({"serializer": self.serializer_class()})

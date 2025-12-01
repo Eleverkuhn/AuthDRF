@@ -3,7 +3,7 @@ from django.db.utils import IntegrityError
 from authdrf.exc import UserAlreadyExists
 from authdrf.web.serializers.user_serializers import PersonalUserSerializer
 from authdrf.service.base_services import BaseService
-from authdrf.data.models.user_models import User
+from authdrf.data.models.user_models import User, UserRepository
 
 
 class UserService(BaseService):
@@ -30,3 +30,7 @@ class UserService(BaseService):
             user.save()
         except IntegrityError:
             raise UserAlreadyExists()
+
+    def change_password(self, user_id: int) -> None:
+        self.request_data.pop("confirm_password")
+        UserRepository(self.request_data).change_password(user_id)

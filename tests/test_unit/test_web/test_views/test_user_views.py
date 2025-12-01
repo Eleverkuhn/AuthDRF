@@ -1,13 +1,14 @@
 from typing import override
 
 from django.urls import reverse
-from django.test import TestCase
+from django.test import TestCase, Client
 
 from logger.setup import LoggingConfig
 from authdrf.exc import UserAlreadyExists
-from authdrf.web.views.user_views import UserPageView
+from authdrf.web.views.user_views import UserPageView, ChangePasswordView
 from authdrf.data.models.user_models import User
 from tests.base_tests import (
+    BaseViewTestMixin,
     BaseTestProtectedViewMixin,
     UserPageMixin,
     TestUpdatePersonalInfoMixin,
@@ -25,7 +26,10 @@ class UserPageTestMixin(TestCase):
 
 
 class TestUserPageView(
-        BaseTestProtectedViewMixin, UserPageMixin, UserPageTestMixin
+        BaseTestProtectedViewMixin,
+        UserPageMixin,
+        UserPageTestMixin,
+        BaseViewTestMixin
 ):
     template = UserPageView.template_name
 
@@ -64,3 +68,29 @@ class TestUserPagePUT(
             self.url, data=self.personal_info, format="json"
         )
         self.assertIn(UserAlreadyExists.default_message, response.content.decode())
+
+
+class ChangePasswordTestMixin(TestCase):
+    url = reverse("change_password")
+
+
+class TestChangePasswordView(
+        BaseTestProtectedViewMixin, BaseViewTestMixin, ChangePasswordTestMixin
+):
+    template = ChangePasswordView.template_name
+
+
+class TestChangePasswordPUT(APIClientProtectedMixin, ChangePasswordTestMixin):
+    def test_updates_password(self) -> None:
+        new_password = UserTestData()._generate_password()
+        request_data = {
+            "password": new_password, "confirm_password": new_password
+        }
+        self.client.put(self.url, data=request_data, format="json")
+
+        client = Client()
+        sign_in_data = {"email": self.user.email, "password": new_password}
+        response = client.post(
+            reverse("sign_in"), data=sign_in_data, follow=False
+        )
+        self.assertEqual(response["Location"], reverse("user_page"))
