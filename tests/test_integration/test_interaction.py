@@ -53,6 +53,19 @@ class BaseInteractionTest(StaticLiveServerTestCase):
             input_box.send_keys(submit_value)
 
 
+class BaseWorkflowWithCreatedUser(BaseInteractionTest):
+    @override
+    def setUp(self) -> None:
+        super().setUp()
+        self.sign_up_data = UserTestData().generate_sign_up_data()
+        self._create_user()
+
+    def _create_user(self) -> None:
+        self.browser.get("".join([self.base_url, reverse("sign_up")]))
+        self.fill_in_form(self.sign_up_data)
+        self.browser.find_element(By.ID, "sign-up-button").click()
+
+
 class TestSignUpWorkflow(BaseInteractionTest):
     @override
     def setUp(self) -> None:
@@ -83,23 +96,16 @@ class TestSignUpWorkflow(BaseInteractionTest):
         self.assertEqual(self.browser.current_url, main_page)
 
 
-class TestSignInWorkflow(BaseInteractionTest):
+class TestSignInWorkflow(BaseWorkflowWithCreatedUser):
     @override
     def setUp(self) -> None:
         super().setUp()
         self.url = "".join([self.base_url, reverse("sign_in")])
         self.serializer = SignInSerializer()
-        self.sign_up_data = UserTestData().generate_sign_up_data()
-        self._create_user()
         self.request_data = {
             "email": self.sign_up_data["email"],
             "password": self.sign_up_data["password"]
         }
-
-    def _create_user(self) -> None:
-        self.browser.get("".join([self.base_url, reverse("sign_up")]))
-        self.fill_in_form(self.sign_up_data)
-        self.browser.find_element(By.ID, "sign-up-button").click()
 
     def test(self) -> None:
         # User opens 'sign-in' page
