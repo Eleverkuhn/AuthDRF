@@ -1,8 +1,5 @@
 from django.contrib import messages
 from django.shortcuts import redirect
-from django.http.response import (
-    HttpResponseRedirect, HttpResponsePermanentRedirect
-)
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.request import Request
@@ -12,15 +9,13 @@ from rest_framework.validators import ValidationError
 from rest_framework.serializers import Serializer
 
 from authdrf.exc import AuthenticationError
-from authdrf.web.views.base_views import BaseViewMixin
+from authdrf.web.views.base_views import BaseViewMixin, RedirectResponse
 from authdrf.web.serializers.user_serializers import (
     UserSerializer, SignInSerializer
 )
 from authdrf.service.auth_services import (
     SignUpService, SignInService, AuthorizationService, RefreshTokenService
 )
-
-type RedirectResponse = HttpResponseRedirect | HttpResponsePermanentRedirect
 
 
 class SignUpView(BaseViewMixin, APIView):

@@ -1,5 +1,8 @@
 from rest_framework import status
 
+from django.http.response import (
+    HttpResponseRedirect, HttpResponsePermanentRedirect
+)
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from rest_framework import status
@@ -13,6 +16,8 @@ from authdrf.service.auth_services import (
     AuthorizationService, RefreshTokenService
 )
 
+type RedirectResponse = HttpResponseRedirect | HttpResponsePermanentRedirect
+
 
 class BaseViewMixin:
     renderer_classes = [TemplateHTMLRenderer]
@@ -20,9 +25,8 @@ class BaseViewMixin:
     serializer_class: type[Serializer]
 
     def get(self, request: Request) -> Response:
-        return Response(
-            {"serializer": self.serializer_class}, status=status.HTTP_200_OK
-        )
+        content = {"serializer": self.serializer_class}
+        return Response(content, status=status.HTTP_200_OK)
 
 
 class ProtectedViewMixin:
