@@ -4,7 +4,8 @@ from typing import override
 from django.test import TestCase
 from rest_framework.response import Response
 
-from authdrf.exc import EmailNotFound, AuthorizationError
+from logger.setup import LoggingConfig
+from authdrf.exc import EmailNotFound, AuthorizationError, RefreshRequired
 from authdrf.service.auth_services import (
     SignUpService, SignInService, AuthorizationService
 )
@@ -67,14 +68,20 @@ class TestAuthoriztionService(TestCase):
     def test_raises_authorization_error_if_token_invalid(self) -> None:
         cookies = {"access_token": "invalid_token"}
         with self.assertRaises(AuthorizationError):
-            AuthorizationService(cookies).check_jwt_is_valid()
+            AuthorizationService(cookies).check_access_token_is_valid()
 
     def test_raises_authorization_error_if_token_expired(self) -> None:
         token = JWTService().create(1, 1)
         cookies = {"access_token": token}
         sleep(2)
         with self.assertRaises(AuthorizationError):
-            AuthorizationService(cookies).check_jwt_is_valid()
+            AuthorizationService(cookies).check_access_token_is_valid()
+
+    def test_raises_refresh_required_if_refresh_token_is_valid(self) -> None:
+        token = JWTService().create(1, 600)
+        cookies = {"refresh_token": token}
+        with self.assertRaises(RefreshRequired):
+            AuthorizationService(cookies).check_refresh_token_is_valid()
 
     def test_raises_authorization_error_if_payload_invalid(self) -> None:
         payload = {"not_id": 1}

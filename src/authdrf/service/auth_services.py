@@ -4,7 +4,7 @@ from typing import override
 from rest_framework.response import Response
 
 from authdrf.exc import (
-    EmailNotFound, AuthorizationError, JWTError, ExpiredToken, RefreshToken
+    EmailNotFound, AuthorizationError, JWTError, ExpiredToken, RefreshRequired
 )
 from authdrf.service.jwt_services import JWTService, Payload
 from authdrf.service.password_services import PasswordService
@@ -140,6 +140,15 @@ class AuthorizationService:
             raise AuthorizationError()
         else:
             return payload
+
+    def check_refresh_token_is_valid(self) -> None:
+        try:
+            payload = JWTService().verify(self.refresh_token)
+        except JWTError:
+            raise AuthorizationError()
+        else:
+            self.check_payload_contains_user_id(payload)
+            raise RefreshRequired(payload["id"])
 
     def check_payload_contains_user_id(self, payload: Payload) -> None:
         if not payload.get("id"):
