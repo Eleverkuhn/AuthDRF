@@ -4,7 +4,7 @@ from django.urls import reverse
 from django.test import TestCase, Client
 
 from logger.setup import LoggingConfig
-from authdrf.exc import UserAlreadyExists
+from authdrf.exc import UserAlreadyExists, AuthorizationError
 from authdrf.web.views.user_views import UserPageView, ChangePasswordView
 from authdrf.data.models.user_models import User
 from tests.base_tests import (
@@ -81,16 +81,28 @@ class TestChangePasswordView(
 
 
 class TestChangePasswordPUT(APIClientProtectedMixin, ChangePasswordTestMixin):
-    def test_updates_password(self) -> None:
-        new_password = UserTestData()._generate_password()
-        request_data = {
-            "password": new_password, "confirm_password": new_password
+    @override
+    def setUp(self) -> None:
+        super().setUp()
+        self.new_password = UserTestData()._generate_password()
+        self.request_data = {
+            "password": self.new_password,
+            "confirm_password": self.new_password
         }
-        self.client.put(self.url, data=request_data, format="json")
+
+    def test_updates_password(self) -> None:
+        self.client.put(self.url, data=self.request_data, format="json")
 
         client = Client()
-        sign_in_data = {"email": self.user.email, "password": new_password}
+        sign_in_data = {"email": self.user.email, "password": self.new_password}
         response = client.post(
             reverse("sign_in"), data=sign_in_data, follow=False
         )
         self.assertEqual(response["Location"], reverse("user_page"))
+
+    def test_user_is_signed_out_after_password_change(self) -> None:
+        self.client.put(self.url, data=self.request_data, format="json")
+        response = self.client.get(reverse("user_page"))
+        self.assertIn(
+            AuthorizationError.default_message, response.content.decode()
+        )

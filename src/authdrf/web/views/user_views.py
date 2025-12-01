@@ -13,6 +13,7 @@ from authdrf.exc import UserAlreadyExists
 from authdrf.web.views.base_views import (
     BaseViewMixin, ProtectedViewMixin, RedirectResponse
 )
+from authdrf.service.auth_services import SignOutService
 from authdrf.web.serializers.user_serializers import (
     PersonalUserSerializer, PasswordSerializer
 )
@@ -78,6 +79,8 @@ class ChangePasswordView(ProtectedViewMixin, BaseViewMixin, PUTView):
         except ValidationError:
             return Response({"serializer": serializer})
         else:
+            response = redirect("sign_in")
             service = UserService(serializer.validated_data)
             service.change_password(request.user.id)
-            return Response({"serializer": self.serializer_class()})
+            SignOutService(response).exec()
+            return response
