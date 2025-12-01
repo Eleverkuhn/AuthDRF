@@ -9,14 +9,10 @@ from rest_framework.response import Response
 from authdrf.exc import (
     EmailNotFound, AuthorizationError, JWTError, ExpiredToken, RefreshRequired
 )
+from authdrf.service.base_services import BaseService
 from authdrf.service.jwt_services import JWTService, Payload
 from authdrf.service.password_services import PasswordService
 from authdrf.data.models.user_models import User, UserRepository
-
-
-class BaseService:
-    def __init__(self, request_data: dict) -> None:
-        self.request_data = request_data
 
 
 class SignUpService(BaseService):
