@@ -1,6 +1,6 @@
 from typing import override
 
-from django.contrib import messages
+from django.urls import reverse
 from django.shortcuts import redirect
 from rest_framework import status
 from rest_framework.views import APIView
@@ -21,13 +21,15 @@ from authdrf.service.user_services import UserService
 from authdrf.data.models.user_models import User
 
 
-class PUTView(APIView):
+class ExtendedHTTPView(APIView):
     def post(self, request: Request) -> Response | RedirectResponse:
         if request.POST.get("_method") == "PUT":
             return self.put(request)
+        if request.POST.get("_method") == "DELETE":
+            return self.delete(request)
 
 
-class UserPageView(ProtectedViewMixin, BaseViewMixin, PUTView):
+class UserPageView(ProtectedViewMixin, BaseViewMixin, ExtendedHTTPView):
     template_name = "my.xhtml"
     serializer_class = PersonalUserSerializer
 
@@ -45,6 +47,12 @@ class UserPageView(ProtectedViewMixin, BaseViewMixin, PUTView):
         else:
             response = self.update_personal_info(request, serializer)
             return response
+
+    def delete(self, request: Request) -> Response | RedirectResponse:
+        response = redirect("main")
+        UserService.delete(request.user.id)
+        SignOutService(response).exec()
+        return response
 
     def update_personal_info(
             self, request: Request, serializer: PersonalUserSerializer
@@ -68,7 +76,7 @@ class UserPageView(ProtectedViewMixin, BaseViewMixin, PUTView):
         return response
 
 
-class ChangePasswordView(ProtectedViewMixin, BaseViewMixin, PUTView):
+class ChangePasswordView(ProtectedViewMixin, BaseViewMixin, ExtendedHTTPView):
     template_name = "change_password.xhtml"
     serializer_class = PasswordSerializer
 

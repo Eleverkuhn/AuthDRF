@@ -34,3 +34,7 @@ class UserService(BaseService):
     def change_password(self, user_id: int) -> None:
         self.request_data.pop("confirm_password")
         UserRepository(self.request_data).change_password(user_id)
+
+    @staticmethod
+    def delete(user_id: int) -> None:
+        UserRepository.set_is_active_to_false(user_id)

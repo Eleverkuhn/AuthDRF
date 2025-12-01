@@ -4,7 +4,7 @@ from django.urls import reverse
 from django.test import TestCase, Client
 
 from logger.setup import LoggingConfig
-from authdrf.exc import UserAlreadyExists, AuthorizationError
+from authdrf.exc import UserAlreadyExists, AuthorizationError, UserDoesNotExist
 from authdrf.web.views.user_views import UserPageView, ChangePasswordView
 from authdrf.data.models.user_models import User
 from tests.base_tests import (
@@ -40,6 +40,26 @@ class TestUserPageView(
 
     def test_contains_user_info(self) -> None:
         self.check_contains()
+
+    def test_delete_redirects_to_main_page(self) -> None:
+        response = self.client.delete(self.url, follow=False)
+        self.assertEqual(response["Location"], reverse("main"))
+
+    def test_delete_signs_out_user(self) -> None:
+        self.client.delete(self.url)
+        response = self.client.get(reverse("user_page"))
+        self.assertIn(
+            AuthorizationError.default_message, response.content.decode()
+        )
+
+    def test_user_can_not_login_after_deletion(self) -> None:
+        sign_in_data = UserTestData().generate_sign_in_data()
+        self.client.post(reverse("sign_in"), data=sign_in_data)
+        self.client.delete(self.url)
+
+        response = self.client.post(reverse("sign_in"), data=sign_in_data)
+
+        self.assertIn(UserDoesNotExist.default_message, response.content.decode())
 
 
 class TestUserPagePUT(

@@ -50,6 +50,12 @@ class UserRepository:  # TODO: move this to separate module
         user.password = self.model_data["password"]
         user.save()
 
+    @staticmethod
+    def set_is_active_to_false(user_id: int) -> None:
+        user = User.objects.get(id=user_id)
+        user.is_active = False
+        user.save()
+
     def hash_password(self) -> None:
         hashed_password = PasswordService(self.model_data["password"]).hash()
         self.model_data["password"] = hashed_password

@@ -13,4 +13,10 @@
   <p>{{ error }}</p>
 {% endif %}
 
+<form id="delete-account" action="{% url 'user_page' %}" method="POST">
+  {% csrf_token %}
+  <input type="hidden" name="_method" value="DELETE">
+  <button type="submit">Delete Account</button>
+</form>
+
 {% endblock %}

@@ -15,6 +15,7 @@ from authdrf.service.jwt_services import JWTService
 from authdrf.data.models.user_models import User
 from tests.base_tests import (
     BaseUserTest,
+    BaseSignInTest,
     BaseViewTestMixin,
     UserTestData,
     BaseTestProtectedViewMixin,
@@ -54,12 +55,9 @@ class TestSignUpView(BaseUserTest, BaseViewTestMixin, TestCase):
         )
 
 
-class TestSignInView(BaseViewTestMixin, TestCase):
+class TestSignInView(BaseViewTestMixin, BaseSignInTest, TestCase):
     url = reverse("sign_in")
     template = SignInView.template_name
-
-    def setUp(self) -> None:
-        self.request_data = UserTestData().generate_sign_in_data()
 
     def test_cookies_are_set(self) -> None:
         response = self.client.post(
