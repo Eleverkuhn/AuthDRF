@@ -31,7 +31,7 @@ class ProtectedViewMixin:
 
     def dispatch(self, request: Request, *args, **kwargs):
         try:
-            AuthorizationService(request.COOKIES).exec()
+            user = AuthorizationService(request.COOKIES).exec()
         except RefreshRequired:
             url = self._construct_refresh_url(request)
             return redirect(reverse("refresh"), url)
@@ -44,6 +44,7 @@ class ProtectedViewMixin:
             )
             return response
         else:
+            request.user = user
             return super().dispatch(request, *args, **kwargs)
 
     def _construct_refresh_url(self, request: Request) -> str:
