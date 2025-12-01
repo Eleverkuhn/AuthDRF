@@ -6,7 +6,9 @@ from django.urls import reverse
 from rest_framework import status
 
 from logger.setup import LoggingConfig
-from authdrf.exc import EmailNotFound, InvalidPassword, AuthorizationError
+from authdrf.exc import (
+    EmailNotFound, InvalidPassword, AuthorizationError, UserAlreadyExists
+)
 from authdrf.web.views.auth_views import SignUpView, SignInView
 from authdrf.service.auth_services import SignUpService
 from authdrf.service.jwt_services import JWTService
@@ -42,6 +44,13 @@ class TestSignUpView(BaseUserTest, BaseViewTestMixin, TestCase):
         self.assertIn(
             SignUpService.success_message(),
             response.content.decode()
+        )
+
+    def test_contains_error_message_if_already_exists_was_raised(self) -> None:
+        self.client.post(self.url, self.request_data)
+        response = self.client.post(self.url, self.request_data)
+        self.assertIn(
+            UserAlreadyExists.default_message, response.content.decode()
         )
 
 

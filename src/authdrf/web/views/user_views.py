@@ -9,6 +9,7 @@ from rest_framework.response import Response
 from rest_framework.validators import ValidationError
 
 from logger.setup import LoggingConfig
+from authdrf.exc import UserAlreadyExists
 from authdrf.web.views.base_views import (
     BaseViewMixin, ProtectedViewMixin, RedirectResponse
 )
@@ -39,8 +40,19 @@ class UserPageView(ProtectedViewMixin, BaseViewMixin, APIView):
         except ValidationError:
             return Response({"serializer": serializer})
         else:
+            response = self.update_personal_info(request, serializer)
+            return response
+
+    def update_personal_info(
+            self, request: Request, serializer: PersonalUserSerializer
+    ) -> Response | RedirectResponse:
+        try:
             user = UserService(serializer.validated_data).update(request.user.id)
-            messages.success(request, "Update is succeed")
+        except UserAlreadyExists as error:
+            return Response(
+                {"serializer": self.serializer_class(request.user), "error": str(error)}
+            )
+        else:
             response = self._construct_response(user)
             return response
 

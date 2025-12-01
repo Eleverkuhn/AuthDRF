@@ -9,4 +9,8 @@
   {% include "form.xhtml" %}
 {% endwith %}
 
+{% if error %}
+  <p>{{ error }}</p>
+{% endif %}
+
 {% endblock %}

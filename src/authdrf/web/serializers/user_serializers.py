@@ -1,6 +1,6 @@
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
-from rest_framework.validators import UniqueValidator, ValidationError
+from rest_framework.validators import ValidationError
 
 from authdrf.data.models.user_models import User
 
@@ -34,7 +34,6 @@ class BasePasswordSerializer(serializers.Serializer):
 
 class PersonalUserSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(
-        validators=[UniqueValidator(User.objects.all())],
         help_text="example@email.com"
     )
 

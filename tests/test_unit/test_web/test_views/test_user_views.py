@@ -3,13 +3,16 @@ from typing import override
 from django.urls import reverse
 from django.test import TestCase
 
+from logger.setup import LoggingConfig
+from authdrf.exc import UserAlreadyExists
 from authdrf.web.views.user_views import UserPageView
 from authdrf.data.models.user_models import User
 from tests.base_tests import (
     BaseTestProtectedViewMixin,
     UserPageMixin,
     TestUpdatePersonalInfoMixin,
-    APIClientProtectedMixin
+    APIClientProtectedMixin,
+    UserTestData
 )
 
 
@@ -53,3 +56,11 @@ class TestUserPagePUT(
 
     def test_updated_info_displayed(self) -> None:
         self.check_contains()
+
+    def test_displays_error_if_already_exists_was_raised(self) -> None:
+        another_user = UserTestData().create_user()
+        self.personal_info["email"] = another_user.email
+        response = self.client.put(
+            self.url, data=self.personal_info, format="json"
+        )
+        self.assertIn(UserAlreadyExists.default_message, response.content.decode())

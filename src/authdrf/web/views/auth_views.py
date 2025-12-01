@@ -8,7 +8,7 @@ from rest_framework.renderers import TemplateHTMLRenderer
 from rest_framework.validators import ValidationError
 from rest_framework.serializers import Serializer
 
-from authdrf.exc import AuthenticationError
+from authdrf.exc import AuthenticationError, UserAlreadyExists
 from authdrf.web.views.base_views import BaseViewMixin, RedirectResponse
 from authdrf.web.serializers.user_serializers import (
     UserSerializer, SignInSerializer
@@ -32,8 +32,18 @@ class SignUpView(BaseViewMixin, APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
         else:
+            response = self.sign_up_user(request, serializer)
+            return response
+
+    def sign_up_user(
+            self, request: Request, serializer: UserSerializer
+    ) -> Response | RedirectResponse:
+        try:
             service = SignUpService(serializer.validated_data)
             service.exec()
+        except UserAlreadyExists as error:
+            return Response({"serializer": serializer, "error": str(error)})
+        else:
             messages.success(request, service.success_message())
             return redirect("main")
 
