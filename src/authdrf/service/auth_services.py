@@ -3,7 +3,9 @@ from typing import override
 
 from rest_framework.response import Response
 
-from authdrf.exc import EmailNotFound, AuthorizationError, JWTError
+from authdrf.exc import (
+    EmailNotFound, AuthorizationError, JWTError, ExpiredToken, RefreshToken
+)
 from authdrf.service.jwt_services import JWTService, Payload
 from authdrf.service.password_services import PasswordService
 from authdrf.data.models.user_models import User, UserRepository
@@ -32,7 +34,7 @@ class SignInService(BaseService):
 
     def exec(self) -> Response:
         user = self.verify_login_data()
-        self.set_cookies(user.id)
+        TokenService(self.response, user.id).set_cookies()
         return self.response
 
     def verify_login_data(self) -> User:
@@ -51,16 +53,37 @@ class SignInService(BaseService):
         else:
             return user
 
-    def set_cookies(self, user_id: int) -> None:
-        access_token, refresh_token = TokenService(user_id).exec()
+
+class TokenService:
+    def __init__(self, response: Response, user_id: int) -> None:
+        self.response = response
+        self.user_id = user_id
+
+    @property
+    def access_token(self) -> str:
+        return JWTService().create(self.user_id, self.access_token_life())
+
+    @staticmethod
+    def access_token_life() -> int:
+        return int(timedelta(minutes=15).total_seconds())
+
+    @property
+    def refresh_token(self) -> str:
+        return JWTService().create(self.user_id, self.refresh_token_life())
+
+    @staticmethod
+    def refresh_token_life() -> int:
+        return int(timedelta(days=7).total_seconds())
+
+    def set_cookies(self) -> None:
         self.set_token_to_response(
             "access_token",
-            access_token,
+            self.access_token,
             TokenService.access_token_life()
         )
         self.set_token_to_response(
             "refresh_token",
-            refresh_token,
+            self.refresh_token,
             TokenService.refresh_token_life()
         )
 
@@ -77,28 +100,6 @@ class SignInService(BaseService):
         )
 
 
-class TokenService:
-    def __init__(self, user_id: int) -> None:
-        self.user_id = user_id
-
-    @staticmethod
-    def access_token_life() -> int:
-        return int(timedelta(minutes=15).total_seconds())
-
-    @staticmethod
-    def refresh_token_life() -> int:
-        return int(timedelta(days=7).total_seconds())
-
-    def exec(self) -> tuple[str, str]:
-        return (self.create_access_token(), self.create_refresh_token())
-
-    def create_access_token(self) -> str:
-        return JWTService().create(self.user_id, self.access_token_life())
-
-    def create_refresh_token(self) -> str:
-        return JWTService().create(self.user_id, self.refresh_token_life())
-
-
 class AuthorizationService:
     def __init__(self, cookies: dict) -> None:
         self.cookies = cookies
@@ -113,7 +114,7 @@ class AuthorizationService:
 
     def exec(self) -> User:
         self.check_cookies_content()
-        payload = self.check_jwt_is_valid()
+        payload = self.check_access_token_is_valid()
         self.check_payload_contains_user_id(payload)
         user = self.check_user_exists(payload["id"])
         return user
@@ -130,9 +131,11 @@ class AuthorizationService:
         if not self.refresh_token:
             raise AuthorizationError()
 
-    def check_jwt_is_valid(self) -> Payload:
+    def check_access_token_is_valid(self) -> Payload:
         try:
             payload = JWTService().verify(self.access_token)
+        except ExpiredToken:
+            raise AuthorizationError()
         except JWTError:
             raise AuthorizationError()
         else:
@@ -149,3 +152,8 @@ class AuthorizationService:
             raise AuthorizationError()
         else:
             return user
+
+
+class RefreshTokenService:
+    def exec(self) -> None:
+        pass

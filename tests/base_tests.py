@@ -1,4 +1,5 @@
 from rest_framework import status
+from rest_framework.response import Response
 from faker import Faker
 
 from authdrf.service.auth_services import TokenService
@@ -106,6 +107,7 @@ class BaseTestProtectedViewMixin:
         self.set_cookies()
 
     def set_cookies(self) -> None:
-        access_token, refresh_token = TokenService(self.user.id).exec()
-        self.client.cookies["access_token"] = access_token
-        self.client.cookies["refresh_token"] = refresh_token
+        response = Response()
+        token_service = TokenService(response, self.user.id)
+        self.client.cookies["access_token"] = token_service.access_token
+        self.client.cookies["refresh_token"] = token_service.refresh_token
