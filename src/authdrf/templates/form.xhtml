@@ -2,6 +2,7 @@
   {% csrf_token %}
   {% for field in serializer %}
     <label for="{{ field.name }}">{{ field.label }}</label>
+    <input type="hidden" name="_method" value="PUT">
     <input
         id="{{ field.name }}"
         name="{{ field.name }}"

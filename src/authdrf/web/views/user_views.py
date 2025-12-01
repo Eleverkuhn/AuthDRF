@@ -28,6 +28,10 @@ class UserPageView(ProtectedViewMixin, BaseViewMixin, APIView):
         response = self._construct_response(request.user)
         return response
 
+    def post(self, request: Request) -> Response | RedirectResponse:
+        if request.POST.get("_method") == "PUT":
+            return self.put(request)
+
     def put(self, request: Request) -> Response | RedirectResponse:
         serializer = self.serializer_class(data=request.data)
         try:
