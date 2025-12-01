@@ -1,5 +1,7 @@
 from django.db import models
+from django.db.utils import IntegrityError
 
+from authdrf.exc import UserAlreadyExists
 from authdrf.service.password_services import PasswordService
 from authdrf.data.models.base_models import ModelFieldDefault
 
@@ -35,8 +37,12 @@ class UserRepository:  # TODO: move this to separate module
 
     def create(self) -> User:
         self.hash_password()
-        user = User.objects.create(**self.model_data)
-        return user
+        try:
+            user = User.objects.create(**self.model_data)
+        except IntegrityError:
+            raise UserAlreadyExists()
+        else:
+            return user
 
     def hash_password(self) -> None:
         hashed_password = PasswordService(self.model_data["password"]).hash()

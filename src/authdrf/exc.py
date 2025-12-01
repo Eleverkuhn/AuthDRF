@@ -9,6 +9,10 @@ class CustomValueError(ValueError):
         super().__init__(self.default_message)
 
 
+class UserAlreadyExists(CustomValueError):
+    default_message = "User with this email already exists"
+
+
 class AuthenticationError(CustomValueError):
     pass
 
