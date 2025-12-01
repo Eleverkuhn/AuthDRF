@@ -6,8 +6,14 @@ from rest_framework import status
 from rest_framework.request import Request
 from rest_framework.response import Response
 
+from logger.setup import LoggingConfig
 from authdrf.exc import (
-    EmailNotFound, AuthorizationError, JWTError, ExpiredToken, RefreshRequired
+    EmailNotFound,
+    UserDoesNotExist,
+    AuthorizationError,
+    JWTError,
+    ExpiredToken,
+    RefreshRequired
 )
 from authdrf.service.base_services import BaseService
 from authdrf.service.jwt_services import JWTService, Payload
@@ -53,11 +59,16 @@ class SignInService(BaseService):
         return self.response
 
     def verify_login_data(self) -> User:
-        user = self.check_user_exists()
+        user = self.get_user()
         PasswordService(
             password=self.request_data["password"],
             hashed_password=user.password
         ).verify()
+        return user
+
+    def get_user(self) -> User:
+        user = self.check_user_exists()
+        self.check_user_is_active(user)
         return user
 
     def check_user_exists(self) -> User:
@@ -67,6 +78,10 @@ class SignInService(BaseService):
             raise EmailNotFound()
         else:
             return user
+
+    def check_user_is_active(self, user: User) -> None:
+        if user.is_active is False:
+            raise UserDoesNotExist()
 
 
 class RefreshTokenService:

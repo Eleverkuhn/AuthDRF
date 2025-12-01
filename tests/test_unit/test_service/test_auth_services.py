@@ -6,7 +6,9 @@ from rest_framework import status
 from rest_framework.response import Response
 
 from logger.setup import LoggingConfig
-from authdrf.exc import EmailNotFound, AuthorizationError, RefreshRequired
+from authdrf.exc import (
+    EmailNotFound, AuthorizationError, RefreshRequired, UserDoesNotExist
+)
 from authdrf.service.auth_services import (
     SignUpService, SignInService, AuthorizationService, RefreshTokenService
 )
@@ -38,6 +40,13 @@ class TestSignInService(BaseSignInTest, TestCase):
         self.service.request_data = request_data
         with self.assertRaises(EmailNotFound):
             self.service.check_user_exists()
+
+    def test_raises_user_does_not_exist_if_user_is_not_active(self) -> None:
+        user = User.objects.get(email=self.request_data["email"])
+        user.is_active = False
+        user.save()
+        with self.assertRaises(UserDoesNotExist):
+            SignInService(Response(), self.request_data).exec()
 
     def test_check_user_returns_user_if_email_was_found(self) -> None:
         user = self.service.check_user_exists()

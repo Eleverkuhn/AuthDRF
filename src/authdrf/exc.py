@@ -33,6 +33,10 @@ class EmailNotFound(AuthenticationError):
     default_message = "Invalid email"
 
 
+class UserDoesNotExist(AuthenticationError):
+    default_message = "User does not exist"
+
+
 class InvalidPassword(AuthenticationError):
     default_message = "Invalid password"
 
