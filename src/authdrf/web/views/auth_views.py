@@ -4,17 +4,17 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.request import Request
 from rest_framework.response import Response
-from rest_framework.renderers import TemplateHTMLRenderer
 from rest_framework.validators import ValidationError
-from rest_framework.serializers import Serializer
 
 from authdrf.exc import AuthenticationError, UserAlreadyExists
-from authdrf.web.views.base_views import BaseViewMixin, RedirectResponse
+from authdrf.web.views.base_views import (
+    BaseViewMixin, RedirectResponse, ProtectedViewMixin
+)
 from authdrf.web.serializers.user_serializers import (
     UserSerializer, SignInSerializer
 )
 from authdrf.service.auth_services import (
-    SignUpService, SignInService, AuthorizationService, RefreshTokenService
+    SignUpService, SignInService, RefreshTokenService, SignOutService
 )
 
 
@@ -82,4 +82,11 @@ class RefreshTokenView(APIView):
     def get(self, request: Request) -> Response:
         response = redirect(request.query_params.get("next"))
         response = RefreshTokenService(request, response).exec()
+        return response
+
+
+class SignOutView(ProtectedViewMixin, APIView):
+    def post(self, request: Request) -> Response:
+        response = redirect("main")
+        SignOutService(response).exec()
         return response

@@ -119,3 +119,12 @@ class TestProtectedView(TestWithCreatedUserMixin, TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)
         self.assertEqual(response["Location"], reverse("refresh"))
+
+
+class TestSignOutView(BaseTestProtectedViewMixin, TestCase):
+    def test_user_is_signed_out(self) -> None:
+        self.client.post(reverse("sign-out"))
+        response = self.client.get(reverse("user_page"))
+        self.assertIn(
+            AuthorizationError.default_message, response.content.decode()
+        )

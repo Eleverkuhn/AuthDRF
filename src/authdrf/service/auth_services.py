@@ -15,6 +15,22 @@ from authdrf.service.password_services import PasswordService
 from authdrf.data.models.user_models import User, UserRepository
 
 
+class SignOutService:
+    def __init__(self, response: Response) -> None:
+        self.response = response
+
+    def exec(self) -> None:
+        self.delete_cookie("access_token")
+        self.delete_cookie("refresh_token")
+
+    def delete_cookie(self, cookie_key: str) -> None:
+        self.response.delete_cookie(
+            key=cookie_key,
+            path="/",
+            samesite="Strict",
+        )
+
+
 class SignUpService(BaseService):
     def exec(self) -> None:
         self.request_data.pop("confirm_password")
