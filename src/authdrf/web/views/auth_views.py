@@ -16,7 +16,9 @@ from authdrf.web.views.base_views import BaseViewMixin
 from authdrf.web.serializers.user_serializers import (
     UserSerializer, SignInSerializer
 )
-from authdrf.service.auth_services import SignUpService, SignInService
+from authdrf.service.auth_services import (
+    SignUpService, SignInService, AuthorizationService, RefreshTokenService
+)
 
 type RedirectResponse = HttpResponseRedirect | HttpResponsePermanentRedirect
 
@@ -69,3 +71,10 @@ class SignInView(BaseViewMixin, APIView):
             )
         else:
             return response
+
+
+class RefreshTokenView(APIView):
+    def get(self, request: Request) -> Response:
+        response = redirect(request.query_params.get("next"))
+        response = RefreshTokenService(request, response).exec()
+        return response
