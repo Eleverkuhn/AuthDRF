@@ -12,9 +12,8 @@ from rest_framework.response import Response
 from rest_framework.request import Request
 
 from authdrf.exc import AuthorizationError, RefreshRequired
-from authdrf.service.auth_services import (
-    AuthorizationService, RefreshTokenService
-)
+from authdrf.service.auth_services import AuthorizationService
+
 
 type RedirectResponse = HttpResponseRedirect | HttpResponsePermanentRedirect
 
