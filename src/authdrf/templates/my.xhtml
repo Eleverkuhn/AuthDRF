@@ -5,11 +5,7 @@
 {% block content %}
 
 {% url 'user_page' as my_url %}
-{% with form_id="edit-personal-form" action=my_url button_id="edit-personal-button" button_text="Edit" serializer=personal_serializer %}
-  {% include "form.xhtml" %}
-{% endwith %}
-
-{% with form_id="edit-password-form" action=my_url button_id="edit-password-button" button_text="Edit" serializer=password_serializer %}
+{% with form_id="edit-personal-form" action=my_url button_id="edit-personal-button" button_text="Edit" serializer=serializer %}
   {% include "form.xhtml" %}
 {% endwith %}
 

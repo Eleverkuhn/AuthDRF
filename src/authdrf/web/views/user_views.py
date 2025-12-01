@@ -1,14 +1,22 @@
 from typing import override
 
+from django.contrib import messages
+from django.shortcuts import redirect
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.request import Request
 from rest_framework.response import Response
+from rest_framework.validators import ValidationError
 
-from authdrf.web.views.base_views import BaseViewMixin, ProtectedViewMixin
+from logger.setup import LoggingConfig
+from authdrf.web.views.base_views import (
+    BaseViewMixin, ProtectedViewMixin, RedirectResponse
+)
 from authdrf.web.serializers.user_serializers import (
     PersonalUserSerializer, PasswordSerializer
 )
+from authdrf.service.user_services import UserService
+from authdrf.data.models.user_models import User
 
 
 class UserPageView(ProtectedViewMixin, BaseViewMixin, APIView):
@@ -17,9 +25,22 @@ class UserPageView(ProtectedViewMixin, BaseViewMixin, APIView):
 
     @override
     def get(self, request: Request) -> Response:
-        content = {
-            "personal_serializer": PersonalUserSerializer(request.user),
-            "password_serializer": PasswordSerializer()
-        }
+        response = self._construct_response(request.user)
+        return response
+
+    def put(self, request: Request) -> Response | RedirectResponse:
+        serializer = self.serializer_class(data=request.data)
+        try:
+            serializer.is_valid(raise_exception=True)
+        except ValidationError:
+            return Response({"serializer": serializer})
+        else:
+            user = UserService(serializer.validated_data).update(request.user.id)
+            messages.success(request, "Update is succeed")
+            response = self._construct_response(user)
+            return response
+
+    def _construct_response(self, user: User) -> Response:
+        content = {"serializer": self.serializer_class(user)}
         response = Response(content, status=status.HTTP_200_OK)
         return response

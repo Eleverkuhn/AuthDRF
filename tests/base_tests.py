@@ -1,7 +1,11 @@
+from typing import override
+
 from rest_framework import status
+from rest_framework.test import APIClient
 from rest_framework.response import Response
 from faker import Faker
 
+from authdrf.web.serializers.user_serializers import PersonalUserSerializer
 from authdrf.service.auth_services import TokenService
 from authdrf.data.models.user_models import User, UserRepository
 
@@ -106,13 +110,38 @@ class TestWithCreatedUserMixin:
         self.user = UserTestData().create_user()
 
 
-class BaseTestProtectedViewMixin(TestWithCreatedUserMixin):
+class UserPageMixin(TestWithCreatedUserMixin):
+    @override
     def setUp(self) -> None:
         super().setUp()
-        self.set_cookies()
+        self.personal_info = PersonalUserSerializer(self.user).data
 
+
+class TestUpdatePersonalInfoMixin(UserPageMixin):
+    @override
+    def setUp(self) -> None:
+        super().setUp()
+        self.personal_info.update({"email": UserTestData().faker.email()})
+
+
+class ClientWithCookies:
     def set_cookies(self) -> None:
         response = Response()
         token_service = TokenService(response, self.user.id)
         self.client.cookies["access_token"] = token_service.access_token
         self.client.cookies["refresh_token"] = token_service.refresh_token
+
+
+class BaseTestProtectedViewMixin(TestWithCreatedUserMixin, ClientWithCookies):
+    @override
+    def setUp(self) -> None:
+        super().setUp()
+        self.set_cookies()
+
+
+class APIClientProtectedMixin(BaseTestProtectedViewMixin, ClientWithCookies):
+    @override
+    def setUp(self) -> None:
+        super().setUp()
+        self.client = APIClient()
+        self.set_cookies()
