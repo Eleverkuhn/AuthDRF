@@ -36,13 +36,38 @@ class UserRepository:  # TODO: move this to separate module
         self.model_data = model_data.copy()
 
     def create(self) -> User:
-        self.hash_password()
         try:
-            user = User.objects.create(**self.model_data)
+            user = User.objects.get(email=self.model_data["email"])
+        except User.DoesNotExist:
+            user = self.create_new_user()
+            return user
+        else:
+            self.check_is_active(user)
+            self.reactivate_user(user)
+            return user
+
+    def create_new_user(self) -> User:
+        self.hash_password()
+        user = User.objects.create(**self.model_data)
+        return user
+
+    def check_is_active(self, user: User) -> None:
+        if user.is_active:
+            raise UserAlreadyExists()
+
+    def reactivate_user(self, user: User) -> None:
+        self.hash_password()
+        user.is_active = True
+        self.update(user, self.model_data)
+
+    @staticmethod
+    def update(user: User, update_data: dict) -> None:
+        for field, value in update_data.items():
+            setattr(user, field, value)
+        try:
+            user.save()
         except IntegrityError:
             raise UserAlreadyExists()
-        else:
-            return user
 
     def change_password(self, user_id: int) -> None:
         self.hash_password()

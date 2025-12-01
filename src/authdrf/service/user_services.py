@@ -10,7 +10,8 @@ class UserService(BaseService):
     def update(self, user_id: int) -> User:
         user = User.objects.get(id=user_id)
         update_data = self.construct_update_data(user)
-        self.update_user(user, update_data)
+        UserRepository.update(user, update_data)
+        # self.update_user(user, update_data)
         return user
 
     def construct_update_data(self, user: User) -> dict:
@@ -22,14 +23,6 @@ class UserService(BaseService):
             if user_data.get(field) != value
         }
         return update_data
-
-    def update_user(self, user: User, update_data: dict) -> None:
-        for field, value in update_data.items():
-            setattr(user, field, value)
-        try:
-            user.save()
-        except IntegrityError:
-            raise UserAlreadyExists()
 
     def change_password(self, user_id: int) -> None:
         self.request_data.pop("confirm_password")
