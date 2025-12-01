@@ -1,6 +1,9 @@
 from datetime import timedelta
 from typing import override
 
+from django.shortcuts import render
+from rest_framework import status
+from rest_framework.request import Request
 from rest_framework.response import Response
 
 from authdrf.exc import (
@@ -52,6 +55,37 @@ class SignInService(BaseService):
             raise EmailNotFound()
         else:
             return user
+
+
+class RefreshTokenService:
+    def __init__(self, request: Request, response: Response) -> None:
+        self.request = request
+        self.response = response
+        self.cookies = request.COOKIES
+
+    def exec(self) -> Response:
+        try:
+            user_id = self.get_user_id_from_payload()
+        except AuthorizationError as error:
+            response = render(
+                self.request,
+                "response_401.xhtml",
+                {"error": str(error)},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+            return response
+        else:
+            TokenService(self.response, user_id).set_cookies()
+            return self.response
+
+    def get_user_id_from_payload(self) -> int:
+        # TODO: create separate classes for checking
+        authorization_service = AuthorizationService(self.cookies)
+        authorization_service.check_refresh_token_exists()
+        payload = authorization_service.check_refresh_token_is_valid()
+        user_id = payload["id"]
+        authorization_service.check_user_exists(user_id)
+        return user_id
 
 
 class TokenService:
@@ -135,20 +169,20 @@ class AuthorizationService:
         try:
             payload = JWTService().verify(self.access_token)
         except ExpiredToken:
-            raise AuthorizationError()
+            raise RefreshRequired()
         except JWTError:
             raise AuthorizationError()
         else:
             return payload
 
-    def check_refresh_token_is_valid(self) -> None:
+    def check_refresh_token_is_valid(self) -> Payload:
         try:
             payload = JWTService().verify(self.refresh_token)
         except JWTError:
             raise AuthorizationError()
         else:
             self.check_payload_contains_user_id(payload)
-            raise RefreshRequired(payload["id"])
+            return payload
 
     def check_payload_contains_user_id(self, payload: Payload) -> None:
         if not payload.get("id"):
@@ -161,8 +195,3 @@ class AuthorizationService:
             raise AuthorizationError()
         else:
             return user
-
-
-class RefreshTokenService:
-    def exec(self) -> None:
-        pass

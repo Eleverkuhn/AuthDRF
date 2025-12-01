@@ -1,17 +1,20 @@
 from time import sleep
 from typing import override
 
-from django.test import TestCase
+from django.test import TestCase, RequestFactory
+from rest_framework import status
 from rest_framework.response import Response
 
 from logger.setup import LoggingConfig
 from authdrf.exc import EmailNotFound, AuthorizationError, RefreshRequired
 from authdrf.service.auth_services import (
-    SignUpService, SignInService, AuthorizationService
+    SignUpService, SignInService, AuthorizationService, RefreshTokenService
 )
 from authdrf.service.jwt_services import JWTService
 from authdrf.data.models.user_models import User
-from tests.base_tests import BaseUserTest, BaseSignInTest, UserTestData
+from tests.base_tests import (
+    BaseUserTest, BaseSignInTest, UserTestData, TestWithCreatedUserMixin
+)
 
 
 class TestSignUpService(BaseUserTest, TestCase):
@@ -39,6 +42,32 @@ class TestSignInService(BaseSignInTest, TestCase):
     def test_check_user_returns_user_if_email_was_found(self) -> None:
         user = self.service.check_user_exists()
         self.assertEqual(user.email, self.request_data["email"])
+
+
+class TestRefreshTokenService(TestWithCreatedUserMixin, TestCase):
+    @override
+    def setUp(self) -> None:
+        super().setUp()
+        self.request = RequestFactory()
+        self.response = Response()
+
+    def test_cookies_are_set(self) -> None:
+        refresh_token = JWTService().create(self.user.id, 600)
+        self.request.COOKIES = {"refresh_token": refresh_token}
+
+        response = RefreshTokenService(self.request, self.response).exec()
+        self.assertTrue(response.cookies.get("access_token"))
+        self.assertTrue(response.cookies.get("refresh_token"))
+
+    def test_returns_unauthorized_response_if_refresh_token_invalid(self) -> None:
+        self.request.COOKIES = {"refresh_token": "invalid"}
+
+        response = RefreshTokenService(self.request, self.response).exec()
+
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertIn(
+            AuthorizationError.default_message, response.content.decode()
+        )
 
 
 class TestAuthoriztionService(TestCase):
@@ -70,18 +99,12 @@ class TestAuthoriztionService(TestCase):
         with self.assertRaises(AuthorizationError):
             AuthorizationService(cookies).check_access_token_is_valid()
 
-    def test_raises_authorization_error_if_token_expired(self) -> None:
+    def test_raises_refresh_required_error_if_token_expired(self) -> None:
         token = JWTService().create(1, 1)
         cookies = {"access_token": token}
         sleep(2)
-        with self.assertRaises(AuthorizationError):
-            AuthorizationService(cookies).check_access_token_is_valid()
-
-    def test_raises_refresh_required_if_refresh_token_is_valid(self) -> None:
-        token = JWTService().create(1, 600)
-        cookies = {"refresh_token": token}
         with self.assertRaises(RefreshRequired):
-            AuthorizationService(cookies).check_refresh_token_is_valid()
+            AuthorizationService(cookies).check_access_token_is_valid()
 
     def test_raises_authorization_error_if_payload_invalid(self) -> None:
         payload = {"not_id": 1}

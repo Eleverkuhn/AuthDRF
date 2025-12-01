@@ -17,10 +17,8 @@ class AuthorizationError(CustomValueError):
     default_message = "You need to sign in to view content of this page"
 
 
-class RefreshRequired(Exception):
-    @override
-    def __init__(self, user_id: int) -> None:
-        self.user_id = user_id
+class RefreshRequired(AuthorizationError):
+    default_message = "Refresh access token"
 
 
 class JWTError(CustomValueError):

@@ -27,7 +27,7 @@ class UserTestData:
 
     def generate_sign_in_data(self) -> dict[str, str]:
         user_model_data = self._generate_user_model_data()
-        UserRepository(user_model_data).create()
+        UserRepository(user_model_data).create()  # TODO: move this to 'TestWithCreatedUserMixin'
         sign_in_data = {
             "email": user_model_data["email"],
             "password": user_model_data["password"]
@@ -101,9 +101,14 @@ class BaseViewTestMixin:
         self.assertTemplateUsed(response, self.template)
 
 
-class BaseTestProtectedViewMixin:
+class TestWithCreatedUserMixin:
     def setUp(self) -> None:
         self.user = UserTestData().create_user()
+
+
+class BaseTestProtectedViewMixin(TestWithCreatedUserMixin):
+    def setUp(self) -> None:
+        super().setUp()
         self.set_cookies()
 
     def set_cookies(self) -> None:
