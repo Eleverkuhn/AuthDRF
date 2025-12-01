@@ -1,13 +1,23 @@
+from time import sleep
+from typing import override
+
 from django.test import TestCase
 from django.urls import reverse
 from rest_framework import status
 
 from logger.setup import LoggingConfig
-from authdrf.exc import EmailNotFound, InvalidPassword
+from authdrf.exc import EmailNotFound, InvalidPassword, AuthorizationError
 from authdrf.web.views.auth_views import SignUpView, SignInView
 from authdrf.service.auth_services import SignUpService
+from authdrf.service.jwt_services import JWTService
 from authdrf.data.models.user_models import User
-from tests.base_tests import BaseUserTest, BaseViewTestMixin, UserTestData
+from tests.base_tests import (
+    BaseUserTest,
+    BaseViewTestMixin,
+    UserTestData,
+    BaseTestProtectedViewMixin,
+    TestWithCreatedUserMixin
+)
 
 
 class TestSignUpView(BaseUserTest, BaseViewTestMixin, TestCase):
@@ -64,3 +74,39 @@ class TestSignInView(BaseViewTestMixin, TestCase):
             self.url, data=self.request_data, follow=False
         )
         self.assertEqual(response["Location"], reverse("user_page"))
+
+
+class TestRefreshTokenView(TestWithCreatedUserMixin, TestCase):
+    url = reverse("refresh")
+
+    def test_redirects_to_originally_requested_url_on_succeed(self) -> None:
+        refresh_token = JWTService().create(self.user.id, 600)
+        self.client.cookies["refresh_token"] = refresh_token
+        url = "".join([self.url, f"?next={reverse('main')}"])
+
+        response = self.client.get(url, follow=False)
+
+        self.assertEqual(response["Location"], reverse("main"))
+
+
+class TestProtectedView(TestWithCreatedUserMixin, TestCase):
+    url = reverse("user_page")
+
+    def test_unlogged_in_user_can_not_view_content(self) -> None:
+        response = self.client.get(self.url)
+        self.assertIn(
+            AuthorizationError.default_message,
+            response.content.decode()
+        )
+
+    def test_expired_access_token_redirects_to_refresh_view(self) -> None:
+        expired_access_token = JWTService().create(self.user.id, 1)
+        refresh_token = JWTService().create(self.user.id, 600)
+        self.client.cookies["access_token"] = expired_access_token
+        self.client.cookies["refresh_token"] = refresh_token
+        sleep(2)
+
+        response = self.client.get(self.url, follow=False)
+
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+        self.assertEqual(response["Location"], reverse("refresh"))
