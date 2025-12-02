@@ -10,8 +10,10 @@ from rest_framework.renderers import TemplateHTMLRenderer
 from rest_framework.serializers import Serializer
 from rest_framework.response import Response
 from rest_framework.request import Request
+from rest_framework.views import APIView
 
-from authdrf.exc import AuthorizationError, RefreshRequired
+from logger.setup import LoggingConfig
+from authdrf.exc import AuthorizationError, RefreshRequired, PermissionError
 from authdrf.service.auth_services import (
     AuthorizationService, PermissionService
 )
@@ -28,6 +30,16 @@ class BaseViewMixin:
     def get(self, request: Request) -> Response:
         content = {"serializer": self.serializer_class}
         return Response(content, status=status.HTTP_200_OK)
+
+
+class ExtendedHTTPView(APIView):
+    def post(self, request: Request) -> Response | RedirectResponse:
+        if request.POST.get("_method") == "PUT":
+            return self.put(request)
+        if request.POST.get("_method") == "DELETE":
+            return self.delete(request)
+        if request.POST.get("_method") == "PATCH":
+            return self.patch(request)
 
 
 class ProtectedViewMixin:
