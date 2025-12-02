@@ -1,3 +1,23 @@
 {% extends "base.xhtml" %}
 
 {% block header_text %}Admin Dashboard{% endblock %}
+
+{% block content %}
+
+<ul>
+  {% for user in users %}
+  <li>{{ user.id }} {{ user.email}} {{ user.role }}</li>
+    <form method="POST" action="{% url 'admin' %}">
+      <select name="role">
+        {% for role in roles %}
+          <option value="{{ role.id }}">{{ role.title }}</option>
+        {% endfor %}
+      </select>
+      <input type="hidden" name="user_id" value="{{ user.id }}">
+      <input type="hidden" name="_method" value="PATCH">
+      <button type="submit">Change role</button>
+    </form>
+  {% endfor %}
+</ul>
+
+{% endblock %}

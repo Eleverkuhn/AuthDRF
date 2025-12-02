@@ -38,6 +38,10 @@ class UserRepository:  # TODO: move this to separate module
     def __init__(self, model_data: dict[str, str | bytes]) -> None:
         self.model_data = model_data.copy()
 
+    @staticmethod
+    def active_users() -> None:
+        return User.objects.filter(is_active=True)
+
     def create(self) -> User:
         try:
             user = User.objects.get(email=self.model_data["email"])

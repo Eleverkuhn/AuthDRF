@@ -221,3 +221,10 @@ class APIClientProtectedMixin(BaseTestProtectedViewMixin, ClientWithCookies):
         super().setUp()
         self.client = APIClient()
         self.set_cookies()
+
+
+class APIClientAdminTest(TestWithCreatedAdminMixin, ClientWithCookies):
+    def setUp(self) -> None:
+        super().setUp()
+        self.client = APIClient()
+        self.set_cookies()
