@@ -62,7 +62,7 @@ services:
     env_file: .env
     command: >
       dockerize -wait tcp://${DJANGO_HOST}:${DJANGO_PORT} -timeout 10s
-      python manage.py test tests.test_integration
+      python manage.py test
     depends_on:
       - migration
       - selenium
