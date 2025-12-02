@@ -1,12 +1,18 @@
+from typing import override
+
 from django.urls import reverse
 from django.test import TestCase
 
 from logger.setup import LoggingConfig
 from authdrf.web.views.admin_views import (
-    AdminDashboardUsersView, AdminDashboardPermissionsView
+    AdminDashboardUsersView,
+    AdminDashboardPermissionsView,
+    AdminDashboardRolesView
 )
 from authdrf.data.models.user_models import User, UserRepository
-from authdrf.data.models.permission_models import RoleRepository, Permission
+from authdrf.data.models.permission_models import (
+    RoleRepository, Permission, Role
+)
 from tests.base_tests import (
     TestAdminViewMixin, UserTestData, APIClientAdminTest
 )
@@ -14,6 +20,10 @@ from tests.base_tests import (
 
 class BaseAdminUsersTest(TestCase):
     url = reverse("admin_users")
+
+
+class BaseAdminRolesTest(TestCase):
+    url = reverse("admin_roles")
 
 
 class TestAdminDashboardPermissionsView(TestAdminViewMixin, TestCase):
@@ -43,6 +53,48 @@ class TestAdminDashboardPermissionsView(TestAdminViewMixin, TestCase):
         response = self.client.delete(self.url, data=request_data)
 
         self.assertNotIn(permission_to_delete.title, response.content.decode())
+
+
+class TestAdminDashboardRolesView(TestAdminViewMixin, BaseAdminRolesTest):
+    template = AdminDashboardRolesView.template_name
+
+    def test_all_roles_are_displayed(self) -> None:
+        roles, content = self._prepare_test_data()
+        for role in roles:
+            self.assertIn(role.title, content)
+
+    def test_all_permissions_for_specific_role_are_displayed(self) -> None:
+        roles, content = self._prepare_test_data()
+        for role in roles:
+            for permission in role.permissions.all():
+                self.assertIn(permission.title, content)
+
+    def test_deletes_role(self) -> None:
+        role = Role.objects.get(id=1)
+        response = self.client.get(self.url)
+        self.assertIn(role.title, response.content.decode())
+
+        request_data = {"role": role.id}
+        response = self.client.delete(self.url, data=request_data)
+        self.assertNotIn(role.title, response)
+
+    def _prepare_test_data(self) -> tuple:
+        roles = Role.objects.all()
+        response = self.client.get(self.url)
+        content = response.content.decode()
+        return (roles, content)
+
+
+class TestAdminDashboardRolesPATCHView(APIClientAdminTest, BaseAdminRolesTest):
+    def test_patch_adds_permission_for_a_role(self) -> None:
+        permission = Permission.objects.get(id=5)
+        role = Role.objects.get(id=1)
+        self.assertNotIn(permission, role.permissions.all())
+        update_data = {"permission_id": permission.id, "role": role.id}
+
+        self.client.patch(self.url, data=update_data)
+        updated_role = Role.objects.get(id=role.id)
+        self.assertIn(permission, updated_role.permissions.all())
 
 
 class TestAdminDashboardView(TestAdminViewMixin, BaseAdminUsersTest):

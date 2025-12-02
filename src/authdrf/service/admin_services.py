@@ -13,24 +13,40 @@ class AdminDashboardService(BaseService):
         permission = self.get_permission()
         permission.delete()
 
-    def get_permission(self) -> Permission:
-        return Permission.objects.get(id=self.request_data["permission_id"])
+    def add_permission_to_role(self) -> None:
+        permission = self.get_permission()
+        role = self.get_role()
+        role.permissions.add(permission)
+
+    def delete_role(self) -> None:
+        role = self.get_role()
+        role.delete()
 
     def change_user_role(self) -> None:
         user = self.get_user()
         user.role = self.get_role()
         user.save()
 
-    def get_user(self) -> User:
-        return User.objects.get(id=self.request_data["user_id"])
+    def get_permission(self) -> Permission:
+        return Permission.objects.get(id=self.request_data["permission_id"])
 
     def get_role(self) -> Role:
         return Role.objects.get(id=self.request_data["role"])
+
+    def get_user(self) -> User:
+        return User.objects.get(id=self.request_data["user_id"])
 
     @staticmethod
     def construct_permissions_content() -> dict[str, QuerySet[Permission]]:
         permissions = Permission.objects.all()
         content = {"permissions": permissions}
+        return content
+
+    @staticmethod
+    def construct_roles_content() -> dict[str, [QuerySet[Role] | QuerySet[Permission]]]:
+        roles = Role.objects.all()
+        permissions = Permission.objects.all()
+        content = {"roles": roles, "permissions": permissions}
         return content
 
     @staticmethod

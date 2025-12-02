@@ -43,6 +43,28 @@ class AdminDashboardPermissionsView(AdminDashboardView):
         return response
 
 
+class AdminDashboardRolesView(AdminDashboardView):
+    template_name = "admin_roles.xhtml"
+
+    def get(self, request: Request) -> Response:
+        return self.construct_response()
+
+    def patch(self, request: Request) -> Response:
+        self.service(request.data).add_permission_to_role()
+        response = self.construct_response()
+        return response
+
+    def delete(self, request: Request) -> Response:
+        self.service(request.data).delete_role()
+        response = self.construct_response()
+        return response
+
+    def construct_response(self) -> Response:
+        content = self.service.construct_roles_content()
+        response = self.get_response(content)
+        return response
+
+
 class AdminDashboardUsersView(AdminDashboardView):
     template_name = "admin_users.xhtml"
 

@@ -1,7 +1,7 @@
 from django.urls import path
 
 from authdrf.web.views.admin_views import (
-    AdminDashboardUsersView, AdminDashboardPermissionsView
+    AdminDashboardUsersView, AdminDashboardPermissionsView, AdminDashboardRolesView
 )
 
 
@@ -12,4 +12,5 @@ urlpatterns = [
         AdminDashboardPermissionsView.as_view(),
         name="admin_permissions"
     ),
+    path("roles/", AdminDashboardRolesView.as_view(), name="admin_roles")
 ]
