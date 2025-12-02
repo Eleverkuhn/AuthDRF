@@ -1,9 +1,6 @@
-from typing import override
-
 from django.urls import reverse
 from django.test import TestCase
 
-from logger.setup import LoggingConfig
 from authdrf.web.views.admin_views import (
     AdminDashboardUsersView,
     AdminDashboardPermissionsView,
@@ -117,8 +114,7 @@ class TestAdminDashboardUsersPATCH(APIClientAdminTest, BaseAdminUsersTest):
         subscriber_id = RoleRepository().subscriber.id
         update_data = {"user_id": test_user.id, "role": subscriber_id}
 
-        response = self.client.patch(self.url, data=update_data)
-        LoggingConfig().logger.debug(response)
+        self.client.patch(self.url, data=update_data)
 
         user_db = User.objects.get(id=test_user.id)
         self.assertEqual(user_db.role.id, subscriber_id)
