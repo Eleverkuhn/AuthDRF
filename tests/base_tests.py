@@ -5,9 +5,11 @@ from rest_framework.test import APIClient
 from rest_framework.response import Response
 from faker import Faker
 
+from config.settings.dev import env
 from authdrf.web.serializers.user_serializers import PersonalUserSerializer
 from authdrf.service.auth_services import TokenService
 from authdrf.data.models.user_models import User, UserRepository
+from authdrf.data.models.permission_models import RoleRepository
 
 
 class BaseUserTest:  # TODO: rename to 'BaseAuthTest'
@@ -25,6 +27,19 @@ class BaseSignInTest:
 class UserTestData:
     def __init__(self) -> None:
         self.faker = Faker()
+
+    def create_premium_subscriber(self) -> User:
+        user = self.create_user()
+        user.role = RoleRepository().premium_subscriber
+        user.save()
+        return user
+
+    def create_subscriber(self) -> User:
+        # user = UserRepository(self._generate_user_model_data()).create()
+        user = self.create_user()
+        user.role = RoleRepository().subscriber
+        user.save()
+        return user
 
     def create_user(self) -> User:
         return UserRepository(self._generate_user_model_data()).create()
@@ -110,6 +125,23 @@ class TestWithCreatedUserMixin:
         self.user = UserTestData().create_user()
 
 
+class BasePermissionViewTest:
+    fixtures = [
+        f"{env.fixtures_dir}/permissions.json",
+        f"{env.fixtures_dir}/roles.json"
+    ]
+
+
+class TestWithCreatedSubscriberMixin(BasePermissionViewTest):
+    def setUp(self) -> None:
+        self.user = UserTestData().create_subscriber()
+
+
+class TestWithCreatedPremiumSubscriberMixin(BasePermissionViewTest):
+    def setUp(self) -> None:
+        self.user = UserTestData().create_premium_subscriber()
+
+
 class UserPageMixin(TestWithCreatedUserMixin):
     @override
     def setUp(self) -> None:
@@ -133,6 +165,28 @@ class ClientWithCookies:
 
 
 class BaseTestProtectedViewMixin(TestWithCreatedUserMixin, ClientWithCookies):
+    @override
+    def setUp(self) -> None:
+        super().setUp()
+        self.set_cookies()
+
+
+class TestSubscriberViewMixin(
+        BaseViewTestMixin,
+        TestWithCreatedSubscriberMixin,
+        ClientWithCookies
+):
+    @override
+    def setUp(self) -> None:
+        super().setUp()
+        self.set_cookies()
+
+
+class TestPremiumSubscriberViewMixin(
+        BaseViewTestMixin,
+        TestWithCreatedPremiumSubscriberMixin,
+        ClientWithCookies
+):
     @override
     def setUp(self) -> None:
         super().setUp()

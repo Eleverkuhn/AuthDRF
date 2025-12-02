@@ -18,7 +18,7 @@ class AuthenticationError(CustomValueError):
 
 
 class PermissionError(CustomValueError):
-    default_message = "You don't have rights to view this page"
+    default_message = "You do not have rights to view this page"
 
 
 class AuthorizationError(CustomValueError):

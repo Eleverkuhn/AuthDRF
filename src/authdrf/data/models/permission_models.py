@@ -16,3 +16,29 @@ class Role(models.Model):
     description = models.TextField()
 
     permissions = models.ManyToManyField(Permission, related_name="roles")
+
+
+class RoleRepository:
+    @property
+    def subscriber_permissions(self) -> list[str]:
+        return self.subscriber.permissions.all()
+
+    @property
+    def subscriber(self) -> Role:
+        return Role.objects.get(id=1)
+
+    @property
+    def premium_subscriber_permissions(self) -> list[str]:
+        return self.premium_subscriber.permissions.all()
+
+    @property
+    def premium_subscriber(self) -> Role:
+        return Role.objects.get(id=2)
+
+    @property
+    def admin_permissions(self) -> list[str]:
+        return self.admin.permissions.all()
+
+    @property
+    def admin(self) -> Role:
+        return Role.objects.get(id=3)
