@@ -12,7 +12,9 @@ from rest_framework.response import Response
 from rest_framework.request import Request
 
 from authdrf.exc import AuthorizationError, RefreshRequired
-from authdrf.service.auth_services import AuthorizationService
+from authdrf.service.auth_services import (
+    AuthorizationService, PermissionService
+)
 
 
 type RedirectResponse = HttpResponseRedirect | HttpResponsePermanentRedirect
@@ -54,3 +56,21 @@ class ProtectedViewMixin:
         requested_url = request.build_absolute_uri()
         url = "".join([reverse("refresh"), f"?next={requested_url}"])
         return url
+
+
+class PermissionViewMixin:
+    permissions: list[str]
+
+    def dispatch(self, request: Request, *args, **kwargs):
+        try:
+            PermissionService(request.user, self.permissions).verify()
+        except PermissionError as error:
+            response = render(
+                request,
+                "response_403.xhtml",
+                {"error": str(error)},
+                status=status.HTTP_403_FORBIDDEN
+            )
+            return response
+        else:
+            return super().dispatch(request, *args, **kwargs)
