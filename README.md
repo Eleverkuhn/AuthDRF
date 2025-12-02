@@ -36,18 +36,9 @@ docker compose up -d
 docker compose logs -f
 ```
 Переход на [локальный сервер](http://localhost:8000/)
-## Запуск тестов локально (опционально, все тесты запускаются при старте контейнера)
+## Создание пользователя с админ правами
 ---
-Создание виртуального окружение
 ```bash
-python -m venv venv
-source venv/bin/activate
-```
-Установить зависимости
-```bash
-pip install .
-```
-При запущенном докер контейнере в главной директории выполнить
-```bash
-python manage.py test
+docker exec -it django bash
+manage.py create_admin
 ```
