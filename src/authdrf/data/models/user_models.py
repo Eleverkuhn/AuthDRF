@@ -4,6 +4,7 @@ from django.db.utils import IntegrityError
 from authdrf.exc import UserAlreadyExists
 from authdrf.service.password_services import PasswordService
 from authdrf.data.models.base_models import ModelFieldDefault
+from authdrf.data.models.permission_models import Role
 
 
 class User(models.Model):
@@ -21,8 +22,10 @@ class User(models.Model):
         help_text="Doe"
     )
     password = models.BinaryField()
-    is_admin = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
+    role = models.OneToOneField(
+        Role, on_delete=models.SET_NULL, related_name="user", null=True
+    )
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
