@@ -21,7 +21,6 @@ class User(models.Model):
         max_length=ModelFieldDefault.NAME_LENGTH,
         help_text="Doe"
     )
-    # password = models.BinaryField()
     password = models.CharField(max_length=128)
     is_active = models.BooleanField(default=True)
     role = models.ForeignKey(
