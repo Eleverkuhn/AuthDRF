@@ -1,0 +1,25 @@
+{% extends "base.xhtml" %}
+
+{% block header_text %}Admin Dashboard{% endblock %}
+
+{% block content %}
+
+<ul>
+  {% for permission in permissions %}
+    <li>{{ permission.title }}</li>
+    <form method="POST" action="{% url 'admin_permissions' %}">
+      <input type="hidden" name="permission_id" value="{{ permission.id }}">
+      <input type="hidden" name="_method" value="DELETE">
+      <button type="submit">Delete permission</button>
+  {% endfor %}
+</ul>
+
+<form method="POST" action="{% url 'admin_permissions' %}">
+  <input type="text" name="permission" value="">
+  <button type="submit">Add permission</button>
+</form>
+
+<a href="{% url 'admin_users' %}">Manage users</a>
+
+
+{% endblock %}
