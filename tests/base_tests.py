@@ -87,12 +87,18 @@ class UserTestData:
 
     def _generate_base_user_data(self) -> dict[str, str]:
         base_user_data = {
-            "first_name": self.faker.first_name(),
-            "middle_name": self.faker.first_name(),
-            "last_name": self.faker.last_name(),
-            "email": self.faker.email(),
+            **self._generate_personal_user_data(),
+            "email": self.faker.email()
         }
         return base_user_data
+
+    def _generate_personal_user_data(self) -> dict[str, str]:
+        personal_user_data = {
+            "first_name": self.faker.first_name(),
+            "middle_name": self.faker.first_name(),
+            "last_name": self.faker.last_name()
+        }
+        return personal_user_data
 
     def _generate_password_data(self) -> dict[str, str]:
         password = self._generate_password()

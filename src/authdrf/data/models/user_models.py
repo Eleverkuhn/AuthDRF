@@ -4,7 +4,7 @@ from django.db.utils import IntegrityError
 from authdrf.exc import UserAlreadyExists
 from authdrf.service.password_services import PasswordService
 from authdrf.data.models.base_models import ModelFieldDefault
-from authdrf.data.models.permission_models import Role
+from authdrf.data.models.permission_models import Role, RoleRepository
 
 
 class User(models.Model):
@@ -41,6 +41,11 @@ class UserRepository:  # TODO: move this to separate module
     @staticmethod
     def active_users() -> None:
         return User.objects.filter(is_active=True)
+
+    def create_admin(self) -> None:
+        user = self.create()
+        user.role = RoleRepository().admin
+        user.save()
 
     def create(self) -> User:
         try:
