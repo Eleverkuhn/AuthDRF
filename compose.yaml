@@ -33,7 +33,11 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    command: python manage.py migrate
+    command: >
+      sh -c "python manage.py migrate
+             python manage.py loaddata ${FIXTURES_DIR}/permissions.json
+             python manage.py loaddata ${FIXTURES_DIR}/roles.json
+             python manage.py loaddata ${FIXTURES_DIR}/users.json"
     networks:
       internal:
 

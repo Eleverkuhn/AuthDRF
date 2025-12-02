@@ -1,0 +1,37 @@
+[
+  {
+    "model": "authdrf.permission",
+    "pk": 1,
+    "fields": {
+      "title": "read_sub_level_posts"
+    }
+  },
+  {
+    "model": "authdrf.permission",
+    "pk": 2,
+    "fields": {
+      "title": "read_premium_level_posts"
+    }
+  },
+  {
+    "model": "authdrf.permission",
+    "pk": 3,
+    "fields": {
+      "title": "manage_users"
+    }
+  },
+  {
+    "model": "authdrf.permission",
+    "pk": 4,
+    "fields": {
+      "title": "manage_posts"
+    }
+  },
+  {
+    "model": "authdrf.permission",
+    "pk": 5,
+    "fields": {
+      "title": "access_admin_page"
+    }
+  }
+]

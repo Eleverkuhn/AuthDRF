@@ -12,13 +12,15 @@ class PasswordService:
 
     @property
     def check_hash_matches(self) -> bool:
-        return bcrypt.checkpw(self.password.encode(), self.hashed_password)
+        return bcrypt.checkpw(
+            self.password.encode("utf-8"), self.hashed_password.encode("utf-8")
+        )
 
     def hash(self) -> bytes:
         hashed_password = bcrypt.hashpw(
-            self.password.encode(), bcrypt.gensalt()
+            self.password.encode("utf-8"), bcrypt.gensalt()
         )
-        return hashed_password
+        return hashed_password.decode("utf-8")
 
     def verify(self) -> None:
         if not self.check_hash_matches:

@@ -1,0 +1,29 @@
+[
+  {
+    "model": "authdrf.role",
+    "pk": 1,
+    "fields": {
+      "title": "subscriber",
+      "description": "Can read subscriber level posts",
+      "permissions": [1]
+    }
+  },
+  {
+    "model": "authdrf.role",
+    "pk": 2,
+    "fields": {
+      "title": "premium_subscriber",
+      "description": "Can read premium-subscriber level posts",
+      "permissions": [1, 2]
+    }
+  },
+  {
+    "model": "authdrf.role",
+    "pk": 3,
+    "fields": {
+      "title": "admin",
+      "description": "Have access to all resources. Can modify user roles",
+      "permissions": [1, 2, 3, 4, 5]
+    }
+  }
+]

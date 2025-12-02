@@ -30,6 +30,8 @@ class Env(BaseSettings):
     selenium_port: str
     live_server: str
 
+    fixtures_dir: str
+
     model_config = SettingsConfigDict(env_file=get_env_file())
 
 

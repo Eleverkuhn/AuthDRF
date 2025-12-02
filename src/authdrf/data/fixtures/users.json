@@ -1,0 +1,158 @@
+[
+  {
+    "model": "authdrf.user",
+    "pk": 1,
+    "fields": {
+      "email": "user1@example.com",
+      "first_name": "Alice",
+      "middle_name": "Marie",
+      "last_name": "Smith",
+      "password": "$2b$12$Gpp0PXgOOTfQTiZ6h3iwM.SlkTTI8MuTQCAyyM819Z3bLHbsjj1Zy",
+      "is_active": true,
+      "role": null
+    }
+  },
+  {
+    "model": "authdrf.user",
+    "pk": 2,
+    "fields": {
+      "email": "user2@example.com",
+      "first_name": "Bob",
+      "middle_name": "John",
+      "last_name": "Doe",
+      "password": "$2b$12$0exVredBrdT6iIBjnDKOYO2GVeScXUG2I5c55EuqEO1cj.k4YQLM.",
+      "is_active": true,
+      "role": null
+    }
+  },
+  {
+    "model": "authdrf.user",
+    "pk": 3,
+    "fields": {
+      "email": "user3@example.com",
+      "first_name": "Charlie",
+      "middle_name": "David",
+      "last_name": "Lee",
+      "password": "$2b$12$QCk8uvtIIsyZnO4ycZtcluFHvVL.PmPBs.uIZWHRuNNPqpTMbMqzW",
+      "is_active": false,
+      "role": null
+    }
+  },
+  {
+    "model": "authdrf.user",
+    "pk": 4,
+    "fields": {
+      "email": "subscriber1@example.com",
+      "first_name": "Diana",
+      "middle_name": "Faye",
+      "last_name": "Adams",
+      "password": "$2b$12$2spQ7HkG6EwKzNwD9FXa0u7RZWRV4oJNNR1FMEt6U2bF1VrS8b6xu",
+      "is_active": true,
+      "role": 1
+    }
+  },
+  {
+    "model": "authdrf.user",
+    "pk": 5,
+    "fields": {
+      "email": "subscriber2@example.com",
+      "first_name": "Edward",
+      "middle_name": "Graham",
+      "last_name": "Brown",
+      "password": "$2b$12$R1tLVp5vM4xhNVo3IoxXQex6dTz0nH13kZK7Lp4jJceOQ4lYfA/8O",
+      "is_active": true,
+      "role": 1
+    }
+  },
+  {
+    "model": "authdrf.user",
+    "pk": 6,
+    "fields": {
+      "email": "subscriber3@example.com",
+      "first_name": "Fiona",
+      "middle_name": "Helen",
+      "last_name": "Clark",
+      "password": "$2b$12$T8F1vPbMkQx5Z7o7xVf0NOv6LZiYlJ5EwIxjZxO.x9Wg8qOi3W6l6",
+      "is_active": false,
+      "role": 1
+    }
+  },
+  {
+    "model": "authdrf.user",
+    "pk": 7,
+    "fields": {
+      "email": "premium1@example.com",
+      "first_name": "George",
+      "middle_name": "Ivan",
+      "last_name": "Evans",
+      "password": "$2b$12$D1VvF9kYcM6x1P0QxU8LGeN3K2j4iJ8l7uFs0e8Q3l6J9uR2pE3aK",
+      "is_active": true,
+      "role": 2
+    }
+  },
+  {
+    "model": "authdrf.user",
+    "pk": 8,
+    "fields": {
+      "email": "premium2@example.com",
+      "first_name": "Hannah",
+      "middle_name": "Jane",
+      "last_name": "Foster",
+      "password": "$2b$12$yQ2ZxV3aK4fP0L9nU1Oe3vJ6mG7wR5qT8xYcN1sL6oP3kF0dE8bJm",
+      "is_active": true,
+      "role": 2
+    }
+  },
+  {
+    "model": "authdrf.user",
+    "pk": 9,
+    "fields": {
+      "email": "premium3@example.com",
+      "first_name": "Ian",
+      "middle_name": "Kyle",
+      "last_name": "Graham",
+      "password": "$2b$12$E1K2fV4mG7jU1P9lH6N5oW3rT2xZ7vQ0sL3bX9cF6dP4jS8yM1qR6",
+      "is_active": false,
+      "role": 2
+    }
+  },
+  {
+    "model": "authdrf.user",
+    "pk": 10,
+    "fields": {
+      "email": "premium4@example.com",
+      "first_name": "Julia",
+      "middle_name": "Laura",
+      "last_name": "Harris",
+      "password": "$2b$12$F9L7nQ3eX6oV2kJ0pT8yW1rC4sZ5xM9bG7uN2hQ1vJ6lR8tD3mP0O",
+      "is_active": true,
+      "role": 2
+    }
+  },
+  {
+    "model": "authdrf.user",
+    "pk": 11,
+    "fields": {
+      "email": "inactive_user@example.com",
+      "first_name": "Kevin",
+      "middle_name": "Morris",
+      "last_name": "Ivy",
+      "password": "$2b$12$K3hT7uV1oF2pJ4nM6L9wC5yX0dZ3eQ8vR2tF1bO6sL4mN9pG7xJ1K",
+      "is_active": false,
+      "role": null
+    }
+  },
+  {
+    "model": "authdrf.user",
+    "pk": 12,
+    "fields": {
+      "email": "admin@example.com",
+      "first_name": "Admin",
+      "middle_name": "Super",
+      "last_name": "User",
+      "password": "$2b$12$A9dV2fJ6xL3uP0kT8yG5hN4rB7mS1eC9oW2qF6vK3jX5tH1nL8pQ",
+      "is_active": true,
+      "role": 3
+    }
+  }
+]
