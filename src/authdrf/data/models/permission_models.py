@@ -17,6 +17,9 @@ class Role(models.Model):
 
     permissions = models.ManyToManyField(Permission, related_name="roles")
 
+    def __repr__(self) -> str:
+        return self.title
+
 
 class RoleRepository:
     @property
