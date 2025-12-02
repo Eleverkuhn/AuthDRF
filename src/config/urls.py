@@ -6,7 +6,6 @@ from authdrf.web.views.business_mock_views import (
     SubscriberPostMockView,
     PremiumPostMockView
 )
-from authdrf.web.views.admin_views import AdminDashboardView
 
 urlpatterns = [
     path("", MainView.as_view(), name="main"),
@@ -15,5 +14,5 @@ urlpatterns = [
     path("public/<int:id>/", PublicPostMockView.as_view(), name="public_post"),
     path("sub/<int:id>/", SubscriberPostMockView.as_view(), name="subscriber_post"),
     path("premium/<int:id>/", PremiumPostMockView.as_view(), name="premium_post"),
-    path("admin/", AdminDashboardView.as_view(), name="admin"),
+    path("admin/", include("authdrf.web.urls.admin_urls")),
 ]

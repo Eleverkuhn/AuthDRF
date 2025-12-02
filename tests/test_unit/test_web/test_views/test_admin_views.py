@@ -2,7 +2,7 @@ from django.urls import reverse
 from django.test import TestCase
 
 from logger.setup import LoggingConfig
-from authdrf.web.views.admin_views import AdminDashboardView
+from authdrf.web.views.admin_views import AdminDashboardUsersView
 from authdrf.data.models.user_models import User, UserRepository
 from authdrf.data.models.permission_models import RoleRepository
 from tests.base_tests import (
@@ -11,11 +11,11 @@ from tests.base_tests import (
 
 
 class BaseAdminTest(TestCase):
-    url = reverse("admin")
+    url = reverse("admin_users")
 
 
 class TestAdminDashboardView(TestAdminViewMixin, BaseAdminTest):
-    template = AdminDashboardView.template_name
+    template = AdminDashboardUsersView.template_name
 
     def test_all_active_users_are_displayed(self) -> None:
         users = UserRepository.active_users()
@@ -27,7 +27,7 @@ class TestAdminDashboardView(TestAdminViewMixin, BaseAdminTest):
             self.assertIn(str(user.role), content)
 
 
-class TestAdminDashboardPATCH(APIClientAdminTest, BaseAdminTest):
+class TestAdminDashboardUsersPATCH(APIClientAdminTest, BaseAdminTest):
     def test_patch_updates_user_role(self) -> None:
         test_user = UserTestData().create_user()
         subscriber_id = RoleRepository().subscriber.id

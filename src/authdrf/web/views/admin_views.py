@@ -10,8 +10,8 @@ from authdrf.service.admin_services import AdminDashboardService
 from authdrf.data.models.permission_models import RoleRepository
 
 
-class AdminDashboardView(ProtectedViewMixin, PermissionViewMixin, ExtendedHTTPView):
-    template_name = "admin.xhtml"
+class AdminDashboardUsersView(ProtectedViewMixin, PermissionViewMixin, ExtendedHTTPView):
+    template_name = "admin_users.xhtml"
     service = AdminDashboardService
 
     @property
