@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework.renderers import TemplateHTMLRenderer
 
 from authdrf.web.views.base_views import ProtectedViewMixin, PermissionViewMixin
-from authdrf.data.models.permission_models import RoleRepository
+from authdrf.data.models.permission_models import RoleRepository, Permission
 
 
 class BaseMockView(APIView):
@@ -25,7 +25,10 @@ class PublicPostMockView(ProtectedViewMixin, BaseMockView):
 
 class SubscriberPostMockView(ProtectedViewMixin, PermissionViewMixin, BaseMockView):
     template_name = "subscriber_post.xhtml"
-    permissions = RoleRepository().subscriber_permissions
+
+    @property
+    def permissions(self) -> list[str]:
+        return RoleRepository().subscriber_permissions
 
     def get(self, request: Request, id: int) -> Response:
         content = self.construct_content("subscriber", id)
@@ -34,7 +37,10 @@ class SubscriberPostMockView(ProtectedViewMixin, PermissionViewMixin, BaseMockVi
 
 class PremiumPostMockView(ProtectedViewMixin, PermissionViewMixin, BaseMockView):
     template_name = "premium_post.xhtml"
-    permissions = RoleRepository().premium_subscriber_permissions
+
+    @property
+    def permissions(self) -> list[str]:
+        return RoleRepository().premium_subscriber_permissions
 
     def get(self, request: Request, id: int) -> Response:
         content = self.construct_content("premium subscriber", id)
