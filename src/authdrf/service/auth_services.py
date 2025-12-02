@@ -10,6 +10,7 @@ from logger.setup import LoggingConfig
 from authdrf.exc import (
     EmailNotFound,
     UserDoesNotExist,
+    PermissionError,
     AuthorizationError,
     JWTError,
     ExpiredToken,
@@ -19,6 +20,7 @@ from authdrf.service.base_services import BaseService
 from authdrf.service.jwt_services import JWTService, Payload
 from authdrf.service.password_services import PasswordService
 from authdrf.data.models.user_models import User, UserRepository
+from authdrf.data.models.permission_models import Role
 
 
 class SignOutService:
@@ -222,3 +224,23 @@ class AuthorizationService:
             raise AuthorizationError()
         else:
             return user
+
+
+class PermissionService:
+    def __init__(self, user: User, resource_permissions: list[str]) -> None:
+        self.user = user
+        self.resource_permissions = set(resource_permissions)
+
+    @property
+    def user_permissions(self) -> set:
+        return set(self.user.role.permissions.all())
+
+    @property
+    def check_have_permissions(self) -> bool:
+        return self.resource_permissions.issubset(self.user_permissions)
+
+    def verify(self) -> None:
+        if not self.user.role:
+            raise PermissionError()
+        if not self.check_have_permissions:
+            raise PermissionError()

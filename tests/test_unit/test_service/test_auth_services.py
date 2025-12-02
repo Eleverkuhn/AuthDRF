@@ -6,14 +6,24 @@ from rest_framework import status
 from rest_framework.response import Response
 
 from logger.setup import LoggingConfig
+from config.settings.dev import env
 from authdrf.exc import (
-    EmailNotFound, AuthorizationError, RefreshRequired, UserDoesNotExist
+    EmailNotFound,
+    AuthorizationError,
+    RefreshRequired,
+    UserDoesNotExist,
+    PermissionError
 )
 from authdrf.service.auth_services import (
-    SignUpService, SignInService, AuthorizationService, RefreshTokenService
+    SignUpService,
+    SignInService,
+    AuthorizationService,
+    RefreshTokenService,
+    PermissionService
 )
 from authdrf.service.jwt_services import JWTService
 from authdrf.data.models.user_models import User
+from authdrf.data.models.permission_models import Role
 from tests.base_tests import (
     BaseUserTest, BaseSignInTest, UserTestData, TestWithCreatedUserMixin
 )
@@ -123,3 +133,34 @@ class TestAuthoriztionService(TestCase):
     def test_check_user_exists_raises_authorization_error_if_no_user(self) -> None:
         with self.assertRaises(AuthorizationError):
             AuthorizationService({}).check_user_exists(1)
+
+
+class TestPermissionService(TestWithCreatedUserMixin, TestCase):
+    fixtures = [
+        f"{env.fixtures_dir}/permissions.json",
+        f"{env.fixtures_dir}/roles.json"
+    ]
+
+    @override
+    def setUp(self) -> None:
+        super().setUp()
+        self.admin_role = Role.objects.get(id=3)
+        self.admin_permissions = self.admin_role.permissions.all()
+
+    def test_raises_permission_error_if_user_has_no_rights(self) -> None:
+        with self.assertRaises(PermissionError):
+            PermissionService(self.user, []).verify()
+
+    def test_raises_permission_error_if_user_has_no_required_rights(self) -> None:
+        sub = Role.objects.get(id=1)
+        self._change_user_role(sub)
+        with self.assertRaises(PermissionError):
+            PermissionService(self.user, self.admin_permissions).verify()
+
+    def test_verification_passes_if_permissions_equal(self) -> None:
+        self._change_user_role(self.admin_role)
+        PermissionService(self.user, self.admin_permissions).verify()
+
+    def _change_user_role(self, role: Role) -> None:
+        self.user.role = role
+        self.user.save()

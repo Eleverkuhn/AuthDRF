@@ -17,6 +17,10 @@ class AuthenticationError(CustomValueError):
     pass
 
 
+class PermissionError(CustomValueError):
+    default_message = "You don't have rights to view this page"
+
+
 class AuthorizationError(CustomValueError):
     default_message = "You need to sign in to view content of this page"
 
