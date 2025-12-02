@@ -19,3 +19,35 @@
 	- `/admin/users`
 	- `/admin/roles`
 	- `/admin/permissions`
+## Запуск
+---
+Скопировать репозиторий
+```bash
+git clone https://github.com/Eleverkuhn/AuthDRF
+cd AuthDRF
+```
+Запуск докер контейнера
+```bash
+docker compose build
+docker compose up -d
+```
+Дождитесь завершения тестов
+```bash
+docker compose logs -f
+```
+Переход на [локальный сервер](http://localhost:8000/)
+## Запуск тестов локально (опционально, все тесты запускаются при старте контейнера)
+---
+Создание виртуального окружение
+```bash
+python -m venv venv
+source venv/bin/activate
+```
+Установить зависимости
+```bash
+pip install .
+```
+При запущенном докер контейнере в главной директории выполнить
+```bash
+python manage.py test
+```
