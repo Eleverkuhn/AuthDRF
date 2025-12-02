@@ -1,32 +1,21 @@
 from typing import override
 
-from django.urls import reverse
 from django.shortcuts import redirect
 from rest_framework import status
-from rest_framework.views import APIView
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.validators import ValidationError
 
-from logger.setup import LoggingConfig
 from authdrf.exc import UserAlreadyExists
 from authdrf.web.views.base_views import (
-    BaseViewMixin, ProtectedViewMixin, RedirectResponse
+    BaseViewMixin, ProtectedViewMixin, RedirectResponse, ExtendedHTTPView
 )
-from authdrf.service.auth_services import SignOutService
 from authdrf.web.serializers.user_serializers import (
     PersonalUserSerializer, PasswordSerializer
 )
+from authdrf.service.auth_services import SignOutService
 from authdrf.service.user_services import UserService
 from authdrf.data.models.user_models import User
-
-
-class ExtendedHTTPView(APIView):
-    def post(self, request: Request) -> Response | RedirectResponse:
-        if request.POST.get("_method") == "PUT":
-            return self.put(request)
-        if request.POST.get("_method") == "DELETE":
-            return self.delete(request)
 
 
 class UserPageView(ProtectedViewMixin, BaseViewMixin, ExtendedHTTPView):

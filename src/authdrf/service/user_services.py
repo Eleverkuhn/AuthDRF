@@ -1,6 +1,3 @@
-from django.db.utils import IntegrityError
-
-from authdrf.exc import UserAlreadyExists
 from authdrf.web.serializers.user_serializers import PersonalUserSerializer
 from authdrf.service.base_services import BaseService
 from authdrf.data.models.user_models import User, UserRepository
@@ -11,7 +8,6 @@ class UserService(BaseService):
         user = User.objects.get(id=user_id)
         update_data = self.construct_update_data(user)
         UserRepository.update(user, update_data)
-        # self.update_user(user, update_data)
         return user
 
     def construct_update_data(self, user: User) -> dict:
