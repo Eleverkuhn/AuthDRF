@@ -28,6 +28,12 @@ class UserTestData:
     def __init__(self) -> None:
         self.faker = Faker()
 
+    def create_admin(self) -> User:
+        user = self.create_user()
+        user.role = RoleRepository().admin
+        user.save()
+        return user
+
     def create_premium_subscriber(self) -> User:
         user = self.create_user()
         user.role = RoleRepository().premium_subscriber
@@ -142,6 +148,11 @@ class TestWithCreatedPremiumSubscriberMixin(BasePermissionViewTest):
         self.user = UserTestData().create_premium_subscriber()
 
 
+class TestWithCreatedAdminMixin(BasePermissionViewTest):
+    def setUp(self) -> None:
+        self.user = UserTestData().create_admin()
+
+
 class UserPageMixin(TestWithCreatedUserMixin):
     @override
     def setUp(self) -> None:
@@ -185,6 +196,17 @@ class TestSubscriberViewMixin(
 class TestPremiumSubscriberViewMixin(
         BaseViewTestMixin,
         TestWithCreatedPremiumSubscriberMixin,
+        ClientWithCookies
+):
+    @override
+    def setUp(self) -> None:
+        super().setUp()
+        self.set_cookies()
+
+
+class TestAdminViewMixin(
+        BaseViewTestMixin,
+        TestWithCreatedAdminMixin,
         ClientWithCookies
 ):
     @override

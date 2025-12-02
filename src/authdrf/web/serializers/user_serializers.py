@@ -67,3 +67,9 @@ class UserSerializer(PersonalUserSerializer, PasswordSerializer):
             "password",
             "confirm_password"
         ]
+
+
+class UserOutSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["id", "email", "role"]
