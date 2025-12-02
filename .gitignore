@@ -7,8 +7,6 @@ wheels/
 *.egg-info
 
 # Virtual environments
-.env
-.env.local
 .venv
 
 # Tools
