@@ -10,7 +10,7 @@
     <form method="POST" action="{% url 'admin_users' %}">
       <select name="role">
         {% for role in roles %}
-          <option value="{{ role.id }}">{{ role.title }}</option>
+          <option value="{{ role.id }}">{{ role.title|default_if_none:"Guest" }}</option>
         {% endfor %}
       </select>
       <input type="hidden" name="user_id" value="{{ user.id }}">
@@ -21,6 +21,6 @@
 </ul>
 
 <a href="{% url 'admin_roles' %}">Manage roles</a>
-<a href="{% url 'admin_users' %}">Manage permissions</a>
+<a href="{% url 'admin_permissions' %}">Manage permissions</a>
 
 {% endblock %}
