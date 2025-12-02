@@ -44,8 +44,7 @@ class SignUpView(BaseViewMixin, APIView):
         except UserAlreadyExists as error:
             return Response({"serializer": serializer, "error": str(error)})
         else:
-            messages.success(request, service.success_message())
-            return redirect("main")
+            return redirect("sign_in")
 
 
 class SignInView(BaseViewMixin, APIView):
@@ -87,6 +86,6 @@ class RefreshTokenView(APIView):
 
 class SignOutView(ProtectedViewMixin, APIView):
     def post(self, request: Request) -> Response:
-        response = redirect("main")
+        response = redirect("sign_in")
         SignOutService(response).exec()
         return response

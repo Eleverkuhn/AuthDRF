@@ -91,9 +91,9 @@ class TestSignUpWorkflow(BaseInteractionTest):
         self.fill_in_form(self.request_data)
         self.browser.find_element(By.ID, "sign-up-button").click()
 
-        # User get redirected to the main page
-        main_page = "".join([self.base_url, reverse("main")])
-        self.assertEqual(self.browser.current_url, main_page)
+        # User get redirected to sign in page
+        sign_in_page = "".join([self.base_url, reverse("sign_in")])
+        self.assertEqual(self.browser.current_url, sign_in_page)
 
 
 class TestSignInWorkflow(BaseWorkflowWithCreatedUser):

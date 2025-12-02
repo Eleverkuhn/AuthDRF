@@ -44,10 +44,6 @@ class SignUpService(BaseService):
         self.request_data.pop("confirm_password")
         UserRepository(self.request_data).create()
 
-    @staticmethod
-    def success_message() -> str:
-        return "Your account has been successfully created"
-
 
 class SignInService(BaseService):
     @override

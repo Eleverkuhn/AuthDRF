@@ -4,8 +4,10 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.renderers import TemplateHTMLRenderer
 
+from authdrf.web.views.base_views import ProtectedViewMixin
 
-class MainView(APIView):
+
+class MainView(ProtectedViewMixin, APIView):
     renderer_classes = [TemplateHTMLRenderer]
     template_name = "index.xhtml"
 

@@ -32,20 +32,12 @@ class TestSignUpView(BaseUserTest, BaseViewTestMixin, TestCase):
         created_user = User.objects.get(email=self.request_data["email"])
         self.assertTrue(created_user)
 
-    def test_redirects_to_main_page_on_succeed(self) -> None:
+    def test_redirects_to_sign_in_page_on_succeed(self) -> None:
         response = self.client.post(
             self.url, data=self.request_data, follow=False
         )
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)
-        self.assertEqual(response["Location"], reverse("main"))
-
-    def test_main_page_contains_succeed_message_after_redirection(self) -> None:
-        response = self.client.post(self.url, self.request_data, follow=True)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn(
-            SignUpService.success_message(),
-            response.content.decode()
-        )
+        self.assertEqual(response["Location"], reverse("sign_in"))
 
     def test_contains_error_message_if_already_exists_was_raised(self) -> None:
         self.client.post(self.url, self.request_data)
